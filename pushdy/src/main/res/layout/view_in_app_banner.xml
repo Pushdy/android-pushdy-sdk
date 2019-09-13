@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="70dp"
+        android:background="@drawable/bg_line_bottom_border">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_toLeftOf="@+id/btnClose"
+            android:orientation="horizontal">
+
+        <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+            <ImageView
+                    android:id="@+id/ivThumb"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:background="#eeeeee"
+                    android:layout_gravity="center" />
+        </FrameLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <TextView
+                    android:id="@+id/tvTitle"
+                    style="@style/TextAppearance.Compat.Notification.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="title" />
+
+            <TextView
+                    android:id="@+id/tvContent"
+                    style="@style/TextAppearance.Compat.Notification.Line2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="content" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/ic_close" />
+</RelativeLayout>
+

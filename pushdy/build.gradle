@@ -1,11 +1,20 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+def gcm_version = safeExtGet("gcm_version", "12.0.1")
+def fcm_version = safeExtGet("fcm_version", "20.0.0")
 
 android {
     compileSdkVersion 28
 
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -24,10 +33,23 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+//    implementation 'com.android.support:appcompat-v7:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    compileOnly "com.google.android.gms:play-services-gcm:$gcm_version"
+    api "com.google.firebase:firebase-messaging:$fcm_version"
+}
+repositories {
+    mavenCentral()
+    google()
+    flatDir {
+        dirs 'libs'
+    }
+    maven { url 'https://maven.google.com' }
 }

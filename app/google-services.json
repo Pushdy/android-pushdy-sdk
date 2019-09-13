@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "919070448695",
+    "firebase_url": "https://pushdytest.firebaseio.com",
+    "project_id": "pushdytest",
+    "storage_bucket": "pushdytest.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919070448695:android:85425d1f405fb765bc33b2",
+        "android_client_info": {
+          "package_name": "com.pushdy.example"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "919070448695-7303jelr5qn1opp7oioq8467pc0t0f2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuhezZ912YpxsWquOIC0I0JKqGDVU3UR4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "919070448695-7303jelr5qn1opp7oioq8467pc0t0f2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
