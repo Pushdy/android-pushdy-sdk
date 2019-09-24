@@ -1,8 +1,10 @@
 package com.pushdy
 
+import android.app.Activity
 import android.app.Application
 import android.app.Notification
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.core.app.NotificationManagerCompat
@@ -43,6 +45,16 @@ open class Pushdy {
         fun customNotification(title:String, body:String, data: Map<String, Any>) : Notification?
     }
 
+    interface PushdyActivityLifeCycleDelegate {
+        fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?)
+        fun onActivityStarted(activity: Activity?)
+        fun onActivityResumed(activity: Activity?)
+        fun onActivityPaused(activity: Activity?)
+        fun onActivityStopped(activity: Activity?)
+        fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?)
+        fun onActivityDestroyed(activity: Activity?)
+    }
+
     companion object {
         private var _deviceID:String? = null
         private var _clientKey:String? = null
@@ -55,6 +67,7 @@ open class Pushdy {
         private var _notificationChannel:String? = null
         private var _pendingNotifications:MutableList<Map<String, Any>> = mutableListOf()
         private var _customPushBannerView:View? = null
+        private var _activityLifeCycleDelegate:PushdyActivityLifeCycleDelegate? = null
         private const val UPDATE_ATTRIBUTES_INTERVAL:Long = 5000
         private val TAG = "Pushdy"
 
@@ -79,6 +92,16 @@ open class Pushdy {
         }
 
         @JvmStatic
+        fun getActivityLifeCycleDelegate() : PushdyActivityLifeCycleDelegate? {
+            return _activityLifeCycleDelegate
+        }
+
+        @JvmStatic
+        fun setActivityLifeCycleDelegate(delegate:PushdyActivityLifeCycleDelegate?)  {
+            _activityLifeCycleDelegate = delegate
+        }
+
+        @JvmStatic
         fun isNotificationEnabled() : Boolean {
             var enabled = false
             if (_context != null) {
@@ -91,7 +114,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        private fun registerForRemoteNotification() {
+        fun registerForRemoteNotification() {
             if (_context != null) {
                 FirebaseMessaging.getInstance().isAutoInitEnabled = true
                 initializeFirebaseInstanceID()
@@ -192,6 +215,21 @@ open class Pushdy {
                     })
                 }
             }
+        }
+
+        @JvmStatic
+        fun getDeviceID() : String? {
+            return PDYLocalData.getDeviceID()
+        }
+
+        @JvmStatic
+        fun getPlayerID() : String? {
+            return PDYLocalData.getPlayerID()
+        }
+
+        @JvmStatic
+        fun getDeviceToken() : String? {
+            return PDYLocalData.getDeviceToken()
         }
 
         /**
@@ -414,7 +452,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun getPendingNotifications() : MutableList<Map<String, Any>> {
+        fun getPendingNotifications() : List<Map<String, Any>> {
             return _pendingNotifications
         }
 

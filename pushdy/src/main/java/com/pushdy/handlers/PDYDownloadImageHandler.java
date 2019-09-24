@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class PDYDownloadImageHandler extends AsyncTask<String, Void, Bitmap> {
@@ -18,15 +19,15 @@ public class PDYDownloadImageHandler extends AsyncTask<String, Void, Bitmap> {
 
     protected Bitmap doInBackground(String... urls) {
         String urldisplay = urls[0];
-        Bitmap mIcon11 = null;
+        Bitmap result = null;
         try {
             InputStream in = new java.net.URL(urldisplay).openStream();
-            mIcon11 = BitmapFactory.decodeStream(in);
+            result = BitmapFactory.decodeStream(in);
         } catch (Exception e) {
             Log.e("Pushdy", "PDYDownloadImageHandler error: " +e.getMessage());
             e.printStackTrace();
         }
-        return mIcon11;
+        return result;
     }
 
     protected void onPostExecute(Bitmap result) {

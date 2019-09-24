@@ -28,6 +28,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     private var _contentTV:TextView? = null
     private var _thumbIV:ImageView? = null
     private var _rootView:View? = null
+    private var _onTap:(() -> Unit?)? = null
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -39,7 +40,8 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         _contentTV = view.findViewById(R.id.tvContent);
         _thumbIV = view.findViewById(R.id.ivThumb);
 
-        val closeBtn:ImageView = view.findViewById(R.id.btnClose);
+        _rootView?.setOnClickListener(this)
+        val closeBtn:ImageView = view.findViewById(R.id.btnClose)
         closeBtn.setOnClickListener(OnClickListener { view ->
             hideView()
         })
@@ -56,9 +58,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
 
     override fun onClick(view: View?) {
         if (view == this) {
-            if (_notification != null) {
-                Pushdy.getDelegate()?.onNotificationOpened(_notification!!, PDYConstant.AppState.ACTIVE)
-            }
+            _onTap?.invoke()
         }
     }
 
@@ -75,6 +75,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
 
     override fun show(notification: Map<String, Any>, onTap: () -> Unit?) {
         _notification = notification
+        _onTap = onTap
 
         _rootView?.post(Runnable {
             if (_notification != null && _rootView != null) {
@@ -109,11 +110,10 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         }
 
         if (Pushdy.isPushBannerAutoDismiss()) {
-            val delayHandler = Handler()
+            val delayHandler = Handler(Looper.getMainLooper())
             delayHandler.postDelayed(Runnable {
                 hideView()
-            }, (Pushdy.getPushBannerDismissDuration() * 1000.0) as Long)
+            }, (Pushdy.getPushBannerDismissDuration() * 1000.0).toLong())
         }
-        onTap.invoke()
     }
 }

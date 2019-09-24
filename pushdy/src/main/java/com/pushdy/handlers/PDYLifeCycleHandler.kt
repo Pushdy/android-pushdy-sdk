@@ -31,38 +31,41 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         curActivity = activity
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityCreated(activity, savedInstanceState)
         val intent = activity?.intent
         processNotificationFromIntent(intent)
     }
 
     override fun onActivityStarted(activity: Activity?) {
-
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityStarted(activity)
     }
 
     override fun onActivityPaused(activity: Activity?) {
-
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityPaused(activity)
     }
 
     override fun onActivityResumed(activity: Activity?) {
         if (isInBackground) {
             isInBackground = false
         }
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityResumed(activity)
         val intent = activity?.intent
         processNotificationFromIntent(intent)
     }
 
     override fun onActivityStopped(activity: Activity?) {
-
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityStopped(activity)
     }
 
     override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
-
+        Pushdy.getActivityLifeCycleDelegate()?.onActivitySaveInstanceState(activity, outState)
     }
 
     override fun onActivityDestroyed(activity: Activity?) {
         if (curActivity == activity) {
             curActivity = null
         }
+        Pushdy.getActivityLifeCycleDelegate()?.onActivityDestroyed(activity)
     }
 
     override fun onLowMemory() {

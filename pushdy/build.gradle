@@ -44,6 +44,7 @@ dependencies {
 
     compileOnly "com.google.android.gms:play-services-gcm:$gcm_version"
     api "com.google.firebase:firebase-messaging:$fcm_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {
     mavenCentral()

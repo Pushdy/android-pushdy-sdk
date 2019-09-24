@@ -110,11 +110,11 @@ internal class PDYNotificationHandler {
                 notification.put("body", body)
 
                 if (bannerView is PDYPushBannerActionInterface) {
-                    (bannerView as PDYPushBannerActionInterface).show(notification) {
+                    (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
                         Pushdy.getDelegate()?.onNotificationOpened(notification, PDYConstant.AppState.ACTIVE)
                         Pushdy.trackOpened(notification)
                         null
-                    }
+                    })
                 }
 
                 // Add and show banner
