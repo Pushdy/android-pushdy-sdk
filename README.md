@@ -8,7 +8,8 @@
 
 
 ## Installation
-**Using Jitpack**
+**Import Using Jitpack**
+
 Step 1. Add the JitPack repository to your build file
 Add it in your root build.gradle at the end of repositories:
 ```gradle
@@ -26,7 +27,23 @@ dependencies {
     implementation 'com.github.Pushdy:android-pushdy-sdk:0.0.1'
 }
 ```
-	
+
+**Add firebase cloud messaging service**
+Add service tag inside application tag
+```xml
+<application
+    ...
+/>
+    ...
+    <service
+        android:name="com.pushdy.services.PDYFirebaseMessagingService"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
+</application>
+```
 ## Usage
 
 **Import**
