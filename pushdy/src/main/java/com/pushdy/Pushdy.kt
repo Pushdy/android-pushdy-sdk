@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.pushdy.core.entities.PDYAttribute
 import com.pushdy.core.entities.PDYNotification
 import com.pushdy.core.entities.PDYParam
@@ -148,11 +149,11 @@ open class Pushdy {
                 }
 
                 val playerID = PDYLocalData.getPlayerID()
-                if (playerID != null) {
-                    createNewSession()
+                if (playerID == null) {
+                    createPlayer()
                 }
                 else {
-                    createPlayer()
+                    createNewSession()
                 }
             }
             else {
@@ -175,6 +176,13 @@ open class Pushdy {
                         Log.d(TAG, "initializeFirebaseInstanceID token: ${token!!}")
                         PDYLocalData.setDeviceToken(token!!)
                         getDelegate()?.onRemoteNotificationRegistered(token!!)
+                        val playerID = PDYLocalData.getPlayerID()
+                        if (playerID == null) {
+                            createPlayer()
+                        }
+                        else {
+                            editPlayer()
+                        }
                     }
                 })
         }
@@ -227,6 +235,10 @@ open class Pushdy {
             return PDYLocalData.getPlayerID()
         }
 
+        private fun setPlayerID(playerID: String) {
+            PDYLocalData.setPlayerID(playerID)
+        }
+
         @JvmStatic
         fun getDeviceToken() : String? {
             return PDYLocalData.getDeviceToken()
@@ -255,13 +267,54 @@ open class Pushdy {
             if (deviceToken != null) {
                 hasTokenBefore = true
             }
+
+            val params = HashMap<String, Any>()
+            if (deviceToken != null) {
+                Log.d("Pushdy", "createPlayer deviceToken: "+deviceToken)
+                params.put(PDYParam.DeviceToken, deviceToken)
+            }
+
             try {
                 _creatingPlayer = true
-                addPlayer(null, { response ->
+                addPlayer(params, { response ->
                     _creatingPlayer = false
+                    val jsonObj = response as JsonObject
+                    if (jsonObj != null && jsonObj.has("success") && jsonObj.get("success").asBoolean == true) {
+                        if (jsonObj.has("id")) {
+                            Log.d("Pushdy", "create player success ")
+                            setPlayerID(jsonObj.get("id").asString)
+                            if (PDYLocalData.attributesHasChanged()) {
+                                editPlayer()
+                            }
+                        }
+                    }
+
+                    var shouldEditPlayer = false
+                    if (getDeviceToken() != null && hasTokenBefore == false) {
+                        shouldEditPlayer = true
+                    }
+
+                    if (PDYLocalData.isFetchedAttributes()) {
+                        if (shouldEditPlayer) {
+                            editPlayer()
+                        }
+                    }
+                    else {
+                        getAttributes({ response:JsonElement? ->
+                            if (shouldEditPlayer) {
+                                editPlayer()
+                            }
+                        }, { code:Int, message:String? ->
+                            if (shouldEditPlayer) {
+                                editPlayer()
+                            }
+                        })
+                    }
+
                     null
                 }, { code:Int, message:String? ->
                     _creatingPlayer = false
+                    Log.d("Pushdy", "create player error ")
                     null
                 })
             }

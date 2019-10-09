@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -55,7 +56,7 @@ internal class PDYNotificationHandler {
                     modifiedNotification.put("title", title)
                     modifiedNotification.put("body", body)
                     val notificationStr = Gson().toJson(modifiedNotification, MutableMap::class.java)
-                    intent.putExtra("notification", notificationStr)
+                    intent.putExtra("pushdy_notification", notificationStr)
 
 
                     val defaultChannel =
@@ -111,6 +112,7 @@ internal class PDYNotificationHandler {
 
                 if (bannerView is PDYPushBannerActionInterface) {
                     (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
+                        Log.d("Pushdy", "In App Banner Notification has tapped")
                         Pushdy.getDelegate()?.onNotificationOpened(notification, PDYConstant.AppState.ACTIVE)
                         Pushdy.trackOpened(notification)
                         null

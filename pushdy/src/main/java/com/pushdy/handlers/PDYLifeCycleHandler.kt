@@ -6,9 +6,11 @@ import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import com.google.gson.Gson
 import com.pushdy.PDYConstant
 import com.pushdy.Pushdy
+import com.pushdy.core.entities.PDYParam
 
 open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
     private constructor()
@@ -30,10 +32,29 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     }
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
+        Log.d("PDYLifeCycleHandler", "onActivityCreated: "+activity?.localClassName)
         curActivity = activity
         Pushdy.getActivityLifeCycleDelegate()?.onActivityCreated(activity, savedInstanceState)
+        val ready = Pushdy.getDelegate()?.readyForHandlingNotification() ?: true
         val intent = activity?.intent
-        processNotificationFromIntent(intent)
+        if (ready) {
+            Log.d("PDYLifeCycleHandler", "onActivityCreated: call processNotificationFromIntent")
+            processNotificationFromIntent(intent)
+        }
+        else {
+            val notificationStr = intent?.getStringExtra("pushdy_notification")
+            if (notificationStr != null) {
+                Log.d("PDYLifeCycleHandler", "onActivityCreated: push to pending notification: "+notificationStr)
+                val notification = Gson().fromJson(notificationStr, Map::class.java) as Map<String, Any>
+                if (notification != null) {
+                    Pushdy.pushPendingNotification(notification)
+                    intent?.removeExtra("pushdy_notification")
+                }
+            }
+            else {
+                Log.d("PDYLifeCycleHandler", "onActivityCreated: no notification in intent")
+            }
+        }
     }
 
     override fun onActivityStarted(activity: Activity?) {
@@ -45,12 +66,31 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     }
 
     override fun onActivityResumed(activity: Activity?) {
+        Log.d("PDYLifeCycleHandler", "onActivityResumed: "+activity?.localClassName)
         if (isInBackground) {
             isInBackground = false
         }
         Pushdy.getActivityLifeCycleDelegate()?.onActivityResumed(activity)
         val intent = activity?.intent
-        processNotificationFromIntent(intent)
+        val ready = Pushdy.getDelegate()?.readyForHandlingNotification() ?: true
+        if (ready) {
+            Log.d("PDYLifeCycleHandler", "onActivityResumed: call processNotificationFromIntent")
+            processNotificationFromIntent(intent)
+        }
+        else {
+            val notificationStr = intent?.getStringExtra("pushdy_notification")
+            if (notificationStr != null) {
+                Log.d("PDYLifeCycleHandler", "onActivityResumed: push to pending notification: "+notificationStr)
+                val notification = Gson().fromJson(notificationStr, Map::class.java) as Map<String, Any>
+                if (notification != null) {
+                    Pushdy.pushPendingNotification(notification)
+                    intent?.removeExtra("pushdy_notification")
+                }
+            }
+            else {
+                Log.d("PDYLifeCycleHandler", "onActivityResumed: no notification in intent")
+            }
+        }
     }
 
     override fun onActivityStopped(activity: Activity?) {
@@ -84,12 +124,20 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     fun processNotificationFromIntent(intent: Intent?) {
         if (intent != null) {
-            val notificationStr = intent.getStringExtra("notification")
+            val notificationStr = intent.getStringExtra("pushdy_notification")
             val notification = Gson().fromJson(notificationStr, MutableMap::class.java)
             if (notification != null) {
                 Pushdy.getDelegate()?.onNotificationOpened(notification as Map<String, Any>, PDYConstant.AppState.BACKGROUND)
                 Pushdy.trackOpened(notification as Map<String, Any>)
-                intent.removeExtra("notification")
+                intent.removeExtra("pushdy_notification")
+
+                // Remove corresponding notification
+                if (notification.containsKey(PDYConstant.Keys.NOTIFICATION_ID)) {
+                    val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
+                    if (notificationID != null) {
+                        Pushdy.removePendingNotification(notificationID)
+                    }
+                }
             }
         }
     }

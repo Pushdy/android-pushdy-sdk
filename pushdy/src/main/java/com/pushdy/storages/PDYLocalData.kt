@@ -370,7 +370,7 @@ open class PDYLocalData {
                 for (i in 0 until attributes!!.size()) {
                     val attr = attributes!![i] as? JsonObject
                     if (attr != null && attr.has("name")) {
-                        val attrName = attr.has("name") as String
+                        val attrName = attr.get("name").asString
                         if (attrName == name) {
                             attribute = attr
                             break
@@ -407,7 +407,7 @@ open class PDYLocalData {
                 for (i in 0 until attributes!!.size()) {
                     val attr = attributes!![i] as? JsonObject
                     if (attr != null && attr.has("name")) {
-                        val attrName = attr.has("name") as String
+                        val attrName = attr.get("name").asString
                         val value = getAttributeValue(attrName)
                         if (value != null) {
                             setPrevAttributeValue(attrName, value)
