@@ -215,13 +215,14 @@ open class Pushdy {
                         })
                     }
                 }
-                else {
-                    getAttributes({ response:JsonElement? ->
-                        // Do no thing
-                    }, { code:Int, message:String? ->
-                        // Do no thing
-                    })
-                }
+                // Ignore fetching new attribute
+//                else {
+//                    getAttributes({ response:JsonElement? ->
+//                        // Do no thing
+//                    }, { code:Int, message:String? ->
+//                        // Do no thing
+//                    })
+//                }
             }
         }
 
