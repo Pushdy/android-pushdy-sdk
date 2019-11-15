@@ -20,6 +20,7 @@ open class PDYLocalData {
 
         fun initWith(ctx:Context) {
             _context = ctx
+            PDYStorage.setString(_context!!, ATTRIBUTES_SCHEMA, """[{"name":"device_name","type":"string","label":"Device Name","default":false},{"name":"network_carrier","type":"string","label":"Network Carrier","default":false},{"name":"registered_at","type":"number","label":"Registered Date","default":false},{"name":"pv_schedule","type":"number","label":"Số lần xem mục Lịch đấu","default":false},{"name":"pv_highlight_video","type":"number","label":"Số lần xem mục Video highlight","default":false},{"name":"device_type","type":"string","label":"Device Type","default":true},{"name":"device_id","type":"string","label":"Device Id","default":true},{"name":"device_token","type":"string","label":"Device Token","default":true},{"name":"device_os","type":"string","label":"Device Os","default":true},{"name":"device_model","type":"string","label":"Device Model","default":true},{"name":"app_version","type":"string","label":"App Version","default":true},{"name":"mobile_number","type":"string","label":"Mobile Number","default":true},{"name":"language","type":"string","label":"Language","default":true},{"name":"country","type":"string","label":"Country","default":true},{"name":"name","type":"string","label":"Name","default":true},{"name":"gender","type":"string","label":"Gender","default":true},{"name":"custom_user_id","type":"string","label":"Custom User_id","default":true},{"name":"utm_source","type":"array","label":"Utm Source","default":true},{"name":"utm_campaign","type":"array","label":"Utm Campaign","default":true},{"name":"utm_medium","type":"array","label":"Utm Medium","default":true},{"name":"utm_term","type":"array","label":"Utm Term","default":true},{"name":"utm_content","type":"array","label":"Utm Content","default":true}]""")
         }
 
         private fun noContextWasSetException() : Exception {
@@ -227,11 +228,12 @@ open class PDYLocalData {
 
         @JvmStatic
         fun isFetchedAttributes() : Boolean {
-            if (_context != null) {
-                val value = PDYStorage.getBool(_context!!, "PUSHDY_FETCHED_ATTRIBUTES")
-                return value ?: false
-            }
-            throw noContextWasSetException()
+            return true
+            //if (_context != null) {
+            //    val value = PDYStorage.getBool(_context!!, "PUSHDY_FETCHED_ATTRIBUTES")
+            //    return value ?: false
+            //}
+            //throw noContextWasSetException()
         }
 
         @JvmStatic

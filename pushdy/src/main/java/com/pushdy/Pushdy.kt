@@ -43,7 +43,7 @@ open class Pushdy {
 //        fun onNotificationFailedToTrack(notification: Any, error:java.lang.Exception)
 //        fun onAttributesReceived(attributes:Any)
 //        fun onAttributesFailedToReceive(error:Exception)
-        fun customNotification(title:String, body:String, data: Map<String, Any>) : Notification?
+        fun customNotification(title:String, body:String, image: String, data: Map<String, Any>) : Notification?
     }
 
     interface PushdyActivityLifeCycleDelegate {
@@ -65,7 +65,9 @@ open class Pushdy {
         private var _editingPlayer:Boolean = false
         private var _fetchingAttributes:Boolean = false
         private var _smallIcon:Int? = null
+        private var _badge_on_foreground:Boolean = false
         private var _notificationChannel:String? = null
+        private var _last_notification_id:String? = null
         private var _pendingNotifications:MutableList<Map<String, Any>> = mutableListOf()
         private var _customPushBannerView:View? = null
         private var _activityLifeCycleDelegate:PushdyActivityLifeCycleDelegate? = null
@@ -85,6 +87,30 @@ open class Pushdy {
 
             initialize()
             observeAttributesChanged()
+        }
+
+        @JvmStatic
+        fun initWith(context:Context, clientKey:String, delegate: PushdyDelegate?, smallIcon: Int?) {
+            _clientKey = clientKey
+            _delegate = delegate
+            _context = context
+            _smallIcon = smallIcon
+
+            initialize()
+            observeAttributesChanged()
+        }
+
+        @JvmStatic
+        fun onNotificationOpened(notification: Map<String, Any>, fromState: String) {
+            val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
+            if (notificationID == _last_notification_id){
+                return
+            }
+            _last_notification_id = notificationID
+            Log.d(TAG, "onNotificationOpened HAS CALLED")
+            val playerID = PDYLocalData.getPlayerID()
+            trackOpened(playerID!!, notification)
+            getDelegate()?.onNotificationOpened(notification, fromState)
         }
 
         @JvmStatic
@@ -208,11 +234,11 @@ open class Pushdy {
                         editPlayer()
                     }
                     else {
-                        getAttributes({ response:JsonElement? ->
-                            editPlayer()
-                        }, { code:Int, message:String? ->
-                            editPlayer()
-                        })
+                        //getAttributes({ response:JsonElement? ->
+                        //    editPlayer()
+                        //}, { code:Int, message:String? ->
+                        //    editPlayer()
+                        //})
                     }
                 }
                 // Ignore fetching new attribute
@@ -234,6 +260,26 @@ open class Pushdy {
         @JvmStatic
         fun getPlayerID() : String? {
             return PDYLocalData.getPlayerID()
+        }
+
+        @JvmStatic
+        fun setBadgeOnForeground(badge_on_foreground:Boolean) {
+            _badge_on_foreground = badge_on_foreground
+        }
+
+        @JvmStatic
+        fun getBadgeOnForeground() : Boolean {
+            return _badge_on_foreground
+        }
+
+        @JvmStatic
+        fun setSmallIcon(icon:Int) {
+            _smallIcon = icon
+        }
+
+        @JvmStatic
+        fun getSmallIcon() : Int? {
+            return _smallIcon ?: R.drawable.ic_notification
         }
 
         private fun setPlayerID(playerID: String) {
@@ -301,15 +347,15 @@ open class Pushdy {
                         }
                     }
                     else {
-                        getAttributes({ response:JsonElement? ->
-                            if (shouldEditPlayer) {
-                                editPlayer()
-                            }
-                        }, { code:Int, message:String? ->
-                            if (shouldEditPlayer) {
-                                editPlayer()
-                            }
-                        })
+                        //getAttributes({ response:JsonElement? ->
+                        //    if (shouldEditPlayer) {
+                        //        editPlayer()
+                        //    }
+                        //}, { code:Int, message:String? ->
+                        //    if (shouldEditPlayer) {
+                        //        editPlayer()
+                        //    }
+                        //})
                     }
 
                     null
@@ -368,11 +414,11 @@ open class Pushdy {
             }
         }
 
-        internal fun trackOpened(notification: Map<String, Any>) {
+        internal fun trackOpened(playerID: String, notification: Map<String, Any>) {
             if (notification.containsKey(PDYConstant.Keys.NOTIFICATION_ID)) {
                 val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
                 if (notificationID != null) {
-                    trackOpened(notificationID, { response ->
+                    trackOpened(playerID, notificationID, { response ->
                         Log.d(TAG, "trackOpened {$notificationID} successfully")
                         null
                     }, { code, message ->
@@ -412,11 +458,11 @@ open class Pushdy {
             }
         }
 
-        internal fun trackOpened(notificationID: String, completion:((response: JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) {
+        internal fun trackOpened(playerID: String, notificationID: String, completion:((response: JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) {
             if (_context != null) {
                 if (_clientKey != null) {
                     val notification = PDYNotification(_context!!, _clientKey!!, _deviceID)
-                    notification.trackOpened(notificationID, completion, failure)
+                    notification.trackOpened(playerID, notificationID, completion, failure)
                 } else {
                     throw noClientKeyException()
                 }
@@ -472,18 +518,6 @@ open class Pushdy {
 
         private fun valueTypeNotSupport() : Exception {
             return Exception("[Pushdy] value's type not supported")
-        }
-
-
-        /**
-         * Custom notification
-         */
-        fun setSmallIcon(icon:Int) {
-            _smallIcon = icon
-        }
-
-        fun getSmallIcon() : Int? {
-            return _smallIcon
         }
 
         fun setNotificationChannel(channel:String) {

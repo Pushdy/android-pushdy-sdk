@@ -7,6 +7,7 @@ import com.pushdy.Pushdy
 import com.pushdy.core.entities.PDYParam
 import com.pushdy.handlers.PDYNotificationHandler
 import com.pushdy.storages.PDYLocalData
+import com.pushdy.views.PDYNotificationView
 
 open class PDYFirebaseMessagingService : FirebaseMessagingService() {
     private val TAG = "FCMService"
@@ -20,8 +21,13 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
         if (data != null) {
             val title = message.notification?.title ?: ""
             val body = message.notification?.body ?: ""
+            var image = message.notification?.imageUrl.toString() ?: ""
+            if (image == "" || image == "null"){
+                Log.d(TAG, PDYNotificationView.getCustomMediaKey())
+                image = data.getOrDefault(PDYNotificationView.getCustomMediaKey(), "")
+            }
 
-            Log.d(TAG, "onMessageReceived title: $title, body: $body")
+            Log.d(TAG, "onMessageReceived title: $title, body: $body, image: $image")
             Log.d(TAG, "data: $data")
             // Check ready state
             var ready = true
@@ -31,12 +37,13 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             }
 
             if (ready) { // Process immediately
-                PDYNotificationHandler.process(title, body, data)
+                PDYNotificationHandler.process(title, body, image, data)
             }
             else { // Push notification to pending stack
                 val pendingNotification:MutableMap<String, Any> = mutableMapOf()
                 pendingNotification.put("title", title)
                 pendingNotification.put("body", body)
+                pendingNotification.put("image", image)
                 pendingNotification.put("data", data)
                 Pushdy.pushPendingNotification(pendingNotification)
             }

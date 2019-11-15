@@ -54,6 +54,11 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         fun setCustomMediaKey(key:String) {
             _customMediaKey = key
         }
+
+        @JvmStatic
+        fun getCustomMediaKey() : String {
+            return _customMediaKey ?: "media_url"
+        }
     }
 
     override fun onClick(view: View?) {
@@ -92,8 +97,8 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
             }
         })
 
-        if (_thumbIV != null && _notification!!.containsKey(mediaKey())) {
-            val mediaKey = _notification!![mediaKey()] as? String
+        if (_thumbIV != null && _notification!!.containsKey("image")) {
+            val mediaKey = _notification!!["image"] as? String
             var showImage = false
             if (mediaKey != null && mediaKey.startsWith("http")) {
                 showImage = true

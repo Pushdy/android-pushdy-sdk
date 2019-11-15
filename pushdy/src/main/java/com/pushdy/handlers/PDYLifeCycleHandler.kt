@@ -67,6 +67,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     override fun onActivityResumed(activity: Activity?) {
         Log.d("PDYLifeCycleHandler", "onActivityResumed: "+activity?.localClassName)
+        curActivity = activity
         if (isInBackground) {
             isInBackground = false
         }
@@ -122,17 +123,37 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     }
 
+    fun bundleToMap(extras: Bundle) : MutableMap<String, Any> {
+        val map:MutableMap<String, Any> = mutableMapOf()
+        val ks = extras.keySet();
+        val iterator = ks.iterator();
+        while (iterator.hasNext()) {
+            var key = iterator.next();
+            try {
+                map.put(key, extras.getString(key));
+            } catch (e: java.lang.Exception){
+            }
+        }
+        return map;
+    }
+
     fun processNotificationFromIntent(intent: Intent?) {
         if (intent != null) {
             val notificationStr = intent.getStringExtra("pushdy_notification")
-            val notification = Gson().fromJson(notificationStr, MutableMap::class.java)
-            if (notification != null) {
-                Pushdy.getDelegate()?.onNotificationOpened(notification as Map<String, Any>, PDYConstant.AppState.BACKGROUND)
-                Pushdy.trackOpened(notification as Map<String, Any>)
-                intent.removeExtra("pushdy_notification")
-
+            var notification = Gson().fromJson(notificationStr, MutableMap::class.java)
+            var fromState = PDYConstant.AppState.ACTIVE
+            if (notification == null){
+                val extras = intent.getExtras()
+                if (extras != null) {
+                    notification = bundleToMap(extras)
+                    fromState = PDYConstant.AppState.BACKGROUND
+                }
+            }
+            if (notification != null && notification.containsKey(PDYConstant.Keys.NOTIFICATION_ID)) {
                 // Remove corresponding notification
                 if (notification.containsKey(PDYConstant.Keys.NOTIFICATION_ID)) {
+                    Pushdy.onNotificationOpened(notification as MutableMap<String, Any>, fromState)
+                    intent.removeExtra("pushdy_notification")
                     val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
                     if (notificationID != null) {
                         Pushdy.removePendingNotification(notificationID)
