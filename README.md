@@ -24,7 +24,7 @@ allprojects {
 Step 2. Add the dependency
 ```gradle
 dependencies {
-    implementation 'com.github.Pushdy:android-pushdy-sdk:0.0.1'
+    implementation 'com.github.Pushdy:android-pushdy-sdk:0.0.3'
 }
 ```
 
