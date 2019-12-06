@@ -70,7 +70,7 @@ class ExampleApplication : Application(), Pushdy.PushdyDelegate {
     override fun onCreate() {
         super.onCreate()
         val clientKey = "your-client-key"
-        Pushdy.initWith(this, clientKey, this)
+        Pushdy.initWith(this, clientKey, this, R.drawable.ic_launcher_small)
     }
 }
 
@@ -84,7 +84,7 @@ public class TestApplication extends Application implements Pushdy.PushdyDelegat
     public void onCreate() {
         super.onCreate();
         String clientKey = "your-client-key";
-        Pushdy.initWith(this, clientKey, this);
+        Pushdy.initWith(this, clientKey, this, R.drawable.ic_launcher_small);
     }
 }
 ```
