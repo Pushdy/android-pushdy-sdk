@@ -8,6 +8,8 @@ import com.pushdy.core.entities.PDYParam
 import com.pushdy.handlers.PDYNotificationHandler
 import com.pushdy.storages.PDYLocalData
 import com.pushdy.views.PDYNotificationView
+import com.google.gson.Gson
+import java.util.Base64
 
 open class PDYFirebaseMessagingService : FirebaseMessagingService() {
     private val TAG = "FCMService"
@@ -24,7 +26,10 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             var image = message.notification?.imageUrl.toString() ?: ""
             if (image == "" || image == "null"){
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
-                image = data.getOrDefault(PDYNotificationView.getCustomMediaKey(), "")
+                image = data.get(PDYNotificationView.getCustomMediaKey())!!
+                if (image == null || image == "null"){
+                    image = ""
+                }
             }
 
             Log.d(TAG, "onMessageReceived title: $title, body: $body, image: $image")
@@ -37,15 +42,10 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             }
 
             if (ready) { // Process immediately
-                PDYNotificationHandler.process(title, body, image, data)
+                PDYNotificationHandler.process(title, body, image, data, String(Base64.getDecoder().decode(data.get("_nms_payload")!!), Charsets.UTF_8))
             }
             else { // Push notification to pending stack
-                val pendingNotification:MutableMap<String, Any> = mutableMapOf()
-                pendingNotification.put("title", title)
-                pendingNotification.put("body", body)
-                pendingNotification.put("image", image)
-                pendingNotification.put("data", data)
-                Pushdy.pushPendingNotification(pendingNotification)
+                Pushdy.pushPendingNotification(String(Base64.getDecoder().decode(data.get("_nms_payload")!!), Charsets.UTF_8))
             }
         }
     }

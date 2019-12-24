@@ -34,23 +34,23 @@ import java.util.Date;
 internal class PDYNotificationHandler {
     private constructor()
     companion object {
-        fun process(title:String, body:String, image:String, data:Map<String, Any>) {
+        fun process(title:String, body:String, image:String, data:Map<String, Any>, jsonData: String) {
             val context = Pushdy.getContext()
             if (context != null) {
                 val visible = PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName())
                 val fromState = if (visible) PDYConstant.AppState.ACTIVE else PDYConstant.AppState.BACKGROUND
-                Pushdy.getDelegate()?.onNotificationReceived(data, fromState)
+                Pushdy.getDelegate()?.onNotificationReceived(jsonData, fromState)
                 if (PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName()) && Pushdy.getBadgeOnForeground()) {
 //                    sendBoardcast(context, title, body, data)
-                    showInAppNotification(context, title, body, image, data)
+                    showInAppNotification(context, title, body, image, data, jsonData)
                 }
                 else {
-                    notify(context!!, title, body, image, data)
+                    notify(context!!, title, body, image, data, jsonData)
                 }
             }
         }
 
-        fun notify(context:Context, title: String, body: String, image:String, data: Map<String, Any>) {
+        fun notify(context:Context, title: String, body: String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
             if (curActivity != null) {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -58,14 +58,7 @@ internal class PDYNotificationHandler {
                 if (notification == null) {
                     val intent = Intent(context, curActivity.javaClass)
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-
-                    val modifiedNotification:MutableMap<String, Any> = mutableMapOf()
-                    modifiedNotification.putAll(data)
-                    modifiedNotification.put("title", title)
-                    modifiedNotification.put("body", body)
-                    modifiedNotification.put("image", image)
-                    val notificationStr = Gson().toJson(modifiedNotification, MutableMap::class.java)
-                    intent.putExtra("pushdy_notification", notificationStr)
+                    intent.putExtra("pushdy_notification", jsonData)
 
                     val defaultChannel =
                         Pushdy.getNotificationChannel() ?: "default_notification_channel"
@@ -136,7 +129,7 @@ internal class PDYNotificationHandler {
 //            LocalBroadcastManager.getInstance(context.applicationContext).sendBroadcast(intent)
 //        }
 
-        fun showInAppNotification(context: Context, title: String, body:String, image:String, data: Map<String, Any>) {
+        fun showInAppNotification(context: Context, title: String, body:String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
             if (curActivity != null) {
                 // Create in app banner view and add notification
@@ -150,7 +143,7 @@ internal class PDYNotificationHandler {
                 if (bannerView is PDYPushBannerActionInterface) {
                     (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
                         Log.d("Pushdy", "In App Banner Notification has tapped")
-                        Pushdy.onNotificationOpened(notification, PDYConstant.AppState.ACTIVE)
+                        Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
                         null
                     })
                 }

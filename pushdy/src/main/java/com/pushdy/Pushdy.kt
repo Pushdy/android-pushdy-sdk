@@ -28,8 +28,8 @@ import kotlin.collections.HashMap
 open class Pushdy {
     interface PushdyDelegate {
         fun readyForHandlingNotification() : Boolean
-        fun onNotificationReceived(notification: Map<String, Any>, fromState: String)
-        fun onNotificationOpened(notification: Map<String, Any>, fromState: String)
+        fun onNotificationReceived(notification: String, fromState: String)
+        fun onNotificationOpened(notification: String, fromState: String)
         fun onRemoteNotificationRegistered(deviceToken: String)
         fun onRemoteNotificationFailedToRegister(error:Exception)
 //        fun onPlayerAdded(playerID:String)
@@ -68,7 +68,7 @@ open class Pushdy {
         private var _badge_on_foreground:Boolean = false
         private var _notificationChannel:String? = null
         private var _last_notification_id:String? = null
-        private var _pendingNotifications:MutableList<Map<String, Any>> = mutableListOf()
+        private var _pendingNotifications:MutableList<String> = mutableListOf()
         private var _customPushBannerView:View? = null
         private var _activityLifeCycleDelegate:PushdyActivityLifeCycleDelegate? = null
         private const val UPDATE_ATTRIBUTES_INTERVAL:Long = 5000
@@ -101,15 +101,14 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun onNotificationOpened(notification: Map<String, Any>, fromState: String) {
-            val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
+        fun onNotificationOpened(notificationID: String, notification: String, fromState: String) {
             if (notificationID == _last_notification_id){
                 return
             }
             _last_notification_id = notificationID
             Log.d(TAG, "onNotificationOpened HAS CALLED")
             val playerID = PDYLocalData.getPlayerID()
-            trackOpened(playerID!!, notification)
+            trackOpened(playerID!!, notificationID)
             getDelegate()?.onNotificationOpened(notification, fromState)
         }
 
@@ -414,18 +413,15 @@ open class Pushdy {
             }
         }
 
-        internal fun trackOpened(playerID: String, notification: Map<String, Any>) {
-            if (notification.containsKey(PDYConstant.Keys.NOTIFICATION_ID)) {
-                val notificationID = notification[PDYConstant.Keys.NOTIFICATION_ID] as? String
-                if (notificationID != null) {
-                    trackOpened(playerID, notificationID, { response ->
-                        Log.d(TAG, "trackOpened {$notificationID} successfully")
-                        null
-                    }, { code, message ->
-                        Log.d(TAG, "trackOpened error: ${code}, messag:${message}")
-                        null
-                    })
-                }
+        internal fun trackOpened(playerID: String, notificationID: String) {
+            if (notificationID != null) {
+                trackOpened(playerID, notificationID, { response ->
+                    Log.d(TAG, "trackOpened {$notificationID} successfully")
+                    null
+                }, { code, message ->
+                    Log.d(TAG, "trackOpened error: ${code}, messag:${message}")
+                    null
+                })
             }
         }
 
@@ -532,7 +528,7 @@ open class Pushdy {
          * Pending notifications
          */
         @JvmStatic
-        fun getPendingNotification() : Map<String, Any>? {
+        fun getPendingNotification() : String? {
             if (_pendingNotifications.size > 0) {
                 return _pendingNotifications[_pendingNotifications.size-1]
             }
@@ -540,7 +536,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun getPendingNotifications() : List<Map<String, Any>> {
+        fun getPendingNotifications() : List<String> {
             return _pendingNotifications
         }
 
@@ -558,12 +554,10 @@ open class Pushdy {
 
             for (i in 0 until _pendingNotifications.size) {
                 val item = _pendingNotifications[i]
-                val idStr = item[PDYConstant.Keys.NOTIFICATION_ID]
-                if (idStr == notificationID) {
+                if (notificationID in item){
                     index = i
                     break
                 }
-
             }
             if (index >= 0 && index < _pendingNotifications.size) {
                 _pendingNotifications.removeAt(index)
@@ -571,7 +565,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun pushPendingNotification(notification: Map<String, Any>) {
+        fun pushPendingNotification(notification: String) {
             _pendingNotifications.add(notification)
         }
 
@@ -669,11 +663,13 @@ open class Pushdy {
             PDYLocalData.setPushBannerAutoDismiss(autoDismiss)
         }
 
+        @JvmStatic
         fun isPushBannerAutoDismiss() : Boolean {
             val autoDismiss = PDYLocalData.isPushBannerAutoDismiss()
             return autoDismiss
         }
 
+        @JvmStatic
         fun getPushBannerDismissDuration() : Float {
             val duration = PDYLocalData.getPushBannerDismissDuration()
             return duration
