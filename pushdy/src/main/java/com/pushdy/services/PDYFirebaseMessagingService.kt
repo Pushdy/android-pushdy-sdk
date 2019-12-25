@@ -9,7 +9,7 @@ import com.pushdy.handlers.PDYNotificationHandler
 import com.pushdy.storages.PDYLocalData
 import com.pushdy.views.PDYNotificationView
 import com.google.gson.Gson
-import java.util.Base64
+import android.util.Base64
 
 open class PDYFirebaseMessagingService : FirebaseMessagingService() {
     private val TAG = "FCMService"

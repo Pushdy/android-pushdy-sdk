@@ -12,7 +12,7 @@ import com.pushdy.PDYConstant
 import com.pushdy.Pushdy
 import com.pushdy.core.entities.PDYParam
 import org.json.JSONObject
-import java.util.Base64
+import android.util.Base64
 
 open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
     private constructor()
