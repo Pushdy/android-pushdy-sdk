@@ -140,7 +140,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
             if (notificationStr == null || notificationStr == ""){
                 val notificationStrEnscript = intent.getStringExtra("_nms_payload")
                 if (notificationStrEnscript != null){
-                    notificationStr = String(Base64.getDecoder().decode(notificationStrEnscript), Charsets.UTF_8)
+                    notificationStr = String(Base64.decode(notificationStrEnscript, Base64.NO_WRAP))
                     Log.d("PDYLifeCycleHandler", "processNotificationFromIntent: "+notificationStr)
                     fromState = PDYConstant.AppState.BACKGROUND
                 }

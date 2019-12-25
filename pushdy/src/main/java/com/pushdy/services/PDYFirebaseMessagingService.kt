@@ -42,10 +42,10 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             }
 
             if (ready) { // Process immediately
-                PDYNotificationHandler.process(title, body, image, data, String(Base64.getDecoder().decode(data.get("_nms_payload")!!), Charsets.UTF_8))
+                PDYNotificationHandler.process(title, body, image, data, String(Base64.decode(data.get("_nms_payload")!!, Base64.NO_WRAP)))
             }
             else { // Push notification to pending stack
-                Pushdy.pushPendingNotification(String(Base64.getDecoder().decode(data.get("_nms_payload")!!), Charsets.UTF_8))
+                Pushdy.pushPendingNotification(String(Base64.decode(data.get("_nms_payload")!!, Base64.NO_WRAP)))
             }
         }
     }
