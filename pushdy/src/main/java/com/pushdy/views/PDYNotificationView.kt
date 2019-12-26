@@ -13,6 +13,7 @@ import android.widget.TextView
 import com.pushdy.PDYConstant
 import com.pushdy.Pushdy
 import com.pushdy.R
+import android.util.Log
 import com.pushdy.core.entities.PDYParam
 import com.pushdy.handlers.PDYDownloadImageHandler
 
@@ -85,7 +86,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     override fun show(notification: Map<String, Any>, onTap: () -> Unit?) {
         _notification = notification
         _onTap = onTap
-
+        Log.d("PDYNotificationView", _notification.toString())
         _rootView?.post(Runnable {
             if (_notification != null && _rootView != null) {
                 if (_notification!!.containsKey("title")) {
