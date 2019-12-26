@@ -86,17 +86,22 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     override fun show(notification: Map<String, Any>, onTap: () -> Unit?) {
         _notification = notification
         _onTap = onTap
-        Log.d("PDYNotificationView", _notification.toString())
-        _rootView?.post(Runnable {
-            if (_notification != null && _rootView != null) {
-                if (_notification!!.containsKey("title")) {
-                    _titleTV?.text = _notification!!["title"] as String
-                }
-                if (_notification!!.containsKey("body")) {
-                    _contentTV?.text = _notification!!["body"] as String
-                }
-            }
-        })
+        //_rootView?.post(Runnable {
+        //    if (_notification != null && _rootView != null) {
+        //        if (_notification!!.containsKey("title")) {
+        //            _titleTV?.text = _notification!!["title"] as String
+        //        }
+        //        if (_notification!!.containsKey("body")) {
+        //            _contentTV?.text = _notification!!["body"] as String
+        //        }
+        //    }
+        //})
+        if (_notification!!.containsKey("title")) {
+            _titleTV?.text = _notification!!["title"] as String
+        }
+        if (_notification!!.containsKey("body")) {
+            _contentTV?.text = _notification!!["body"] as String
+        }
 
         if (_thumbIV != null && _notification!!.containsKey("image")) {
             val mediaKey = _notification!!["image"] as? String
