@@ -516,6 +516,7 @@ open class Pushdy {
             return Exception("[Pushdy] value's type not supported")
         }
 
+        @JvmStatic
         fun setNotificationChannel(channel:String) {
             _notificationChannel = channel
         }
@@ -659,6 +660,7 @@ open class Pushdy {
         /**
          * In App Push Banner
          */
+        @JvmStatic
         fun setPushBannerAutoDismiss(autoDismiss:Boolean) {
             PDYLocalData.setPushBannerAutoDismiss(autoDismiss)
         }
@@ -675,6 +677,7 @@ open class Pushdy {
             return duration
         }
 
+        @JvmStatic
         fun setPushBannerDismissDuration(duration:Float) {
             PDYLocalData.setPushBannerDismissDuration(duration)
         }
@@ -683,6 +686,7 @@ open class Pushdy {
             return _customPushBannerView
         }
 
+        @JvmStatic
         fun setCustomPushBanner(customView:View) {
             if (customView is PDYPushBannerActionInterface) {
                 _customPushBannerView = customView
