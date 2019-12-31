@@ -41,7 +41,9 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         _contentTV = view.findViewById(R.id.tvContent)
         _thumbIV = view.findViewById(R.id.ivThumb)
 
-        _rootView?.setOnClickListener(this)
+        _titleTV?.setOnClickListener(this)
+        _contentTV?.setOnClickListener(this)
+        _thumbIV?.setOnClickListener(this)
         val closeBtn:ImageView = view.findViewById(R.id.btnClose)
         closeBtn.setOnClickListener(OnClickListener { view ->
             hideView()
@@ -63,7 +65,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     }
 
     override fun onClick(view: View?) {
-        if (view == this) {
+        if (view == this || true) {
             _onTap?.invoke()
             hideView()
         }
