@@ -6,6 +6,7 @@
         android:background="@drawable/bg_line_bottom_border">
 
     <LinearLayout
+            android:id="@+id/llBadge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"

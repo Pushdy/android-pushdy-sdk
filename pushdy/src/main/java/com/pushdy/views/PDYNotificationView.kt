@@ -29,6 +29,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     private var _contentTV:TextView? = null
     private var _thumbIV:ImageView? = null
     private var _rootView:View? = null
+    private var _badge:View? = null
     private var _onTap:(() -> Unit?)? = null
 
     constructor(context: Context) : this(context, null)
@@ -37,13 +38,12 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val view = LayoutInflater.from(context).inflate(R.layout.view_in_app_banner, this, true)
         _rootView = view
+        _badge = view.findViewById(R.id.llBadge)
         _titleTV = view.findViewById(R.id.tvTitle)
         _contentTV = view.findViewById(R.id.tvContent)
         _thumbIV = view.findViewById(R.id.ivThumb)
 
-        _titleTV?.setOnClickListener(this)
-        _contentTV?.setOnClickListener(this)
-        _thumbIV?.setOnClickListener(this)
+        _badge?.setOnClickListener(this)
         val closeBtn:ImageView = view.findViewById(R.id.btnClose)
         closeBtn.setOnClickListener(OnClickListener { view ->
             hideView()
