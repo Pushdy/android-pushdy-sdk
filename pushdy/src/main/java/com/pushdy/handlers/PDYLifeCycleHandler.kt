@@ -44,9 +44,15 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
             processNotificationFromIntent(intent)
         }
         else {
-            val notificationStr = intent?.getStringExtra("pushdy_notification")
-            if (notificationStr != null) {
-                Log.d("PDYLifeCycleHandler", "onActivityCreated: push to pending notification: "+notificationStr)
+            var notificationStr = intent?.getStringExtra("pushdy_notification")
+            if (notificationStr == null || notificationStr == ""){
+                val notificationStrEnscript = intent?.getStringExtra("_nms_payload")
+                if (notificationStrEnscript != null){
+                    notificationStr = String(Base64.decode(notificationStrEnscript, Base64.NO_WRAP))
+                }
+            }
+            if (notificationStr != null && notificationStr != "") {
+                Log.d("PDYLifeCycleHandler", "onActivityResumed: push to pending notification: "+notificationStr)
                 Pushdy.pushPendingNotification(notificationStr)
                 intent?.removeExtra("pushdy_notification")
             }
@@ -78,8 +84,14 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
             processNotificationFromIntent(intent)
         }
         else {
-            val notificationStr = intent?.getStringExtra("pushdy_notification")
-            if (notificationStr != null) {
+            var notificationStr = intent?.getStringExtra("pushdy_notification")
+            if (notificationStr == null || notificationStr == ""){
+                val notificationStrEnscript = intent?.getStringExtra("_nms_payload")
+                if (notificationStrEnscript != null){
+                    notificationStr = String(Base64.decode(notificationStrEnscript, Base64.NO_WRAP))
+                }
+            }
+            if (notificationStr != null && notificationStr != "") {
                 Log.d("PDYLifeCycleHandler", "onActivityResumed: push to pending notification: "+notificationStr)
                 Pushdy.pushPendingNotification(notificationStr)
                 intent?.removeExtra("pushdy_notification")
@@ -155,6 +167,8 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
                     Pushdy.removePendingNotification(notificationID)
                 }
             }
+        } else {
+            Log.d("PDYLifeCycleHandler", "intent null")
         }
     }
 }
