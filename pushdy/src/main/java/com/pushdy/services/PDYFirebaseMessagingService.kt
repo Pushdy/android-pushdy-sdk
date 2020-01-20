@@ -26,7 +26,8 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             var image = message.notification?.imageUrl.toString() ?: ""
             if (image == "" || image == "null"){
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
-                image = data.get(PDYNotificationView.getCustomMediaKey())!!
+                val media_key = PDYNotificationView.getCustomMediaKey()
+                image = data.get(media_key).toString()
                 if (image == null || image == "null"){
                     image = ""
                 }
