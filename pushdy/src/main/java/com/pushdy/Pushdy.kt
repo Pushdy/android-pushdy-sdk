@@ -80,6 +80,13 @@ open class Pushdy {
         }
 
         @JvmStatic
+        fun registerActivityLifecycle(_context:Context) {
+            if (_context!! is Application) {
+                PDYLifeCycleHandler.listen(_context!! as Application)
+            }
+        }
+
+        @JvmStatic
         fun initWith(context:Context, clientKey:String, delegate: PushdyDelegate?) {
             _clientKey = clientKey
             _delegate = delegate

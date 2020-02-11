@@ -23,12 +23,14 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
         var curActivity:Activity? = null
 
         fun listen(application:Application?) {
-            if (sharedInstance == null) {
-                sharedInstance = PDYLifeCycleHandler()
-            }
+            if (curActivity == null){
+                if (sharedInstance == null) {
+                    sharedInstance = PDYLifeCycleHandler()
+                }
 
-            application?.registerActivityLifecycleCallbacks(sharedInstance!!)
-            application?.registerComponentCallbacks(sharedInstance!!)
+                application?.registerActivityLifecycleCallbacks(sharedInstance!!)
+                application?.registerComponentCallbacks(sharedInstance!!)
+            }
         }
 
     }
