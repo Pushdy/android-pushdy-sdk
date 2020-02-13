@@ -19,7 +19,8 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     companion object {
         private var sharedInstance:PDYLifeCycleHandler? = null
-        private var isInBackground = false
+        private var isInBackground = true
+        private var lastSession = 0L
         var curActivity:Activity? = null
 
         fun listen(application:Application?) {
@@ -65,19 +66,23 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     }
 
     override fun onActivityStarted(activity: Activity?) {
+        if (isInBackground && System.currentTimeMillis() > lastSession + 600000){
+            Pushdy.onSession()
+        }
+        Log.d("PDYLifeCycleHandler", "onActivityStarted: "+activity?.localClassName)
+        isInBackground = false
         Pushdy.getActivityLifeCycleDelegate()?.onActivityStarted(activity)
     }
 
     override fun onActivityPaused(activity: Activity?) {
+        Log.d("PDYLifeCycleHandler", "onActivityPaused: "+activity?.localClassName)
         Pushdy.getActivityLifeCycleDelegate()?.onActivityPaused(activity)
     }
 
     override fun onActivityResumed(activity: Activity?) {
         Log.d("PDYLifeCycleHandler", "onActivityResumed: "+activity?.localClassName)
         curActivity = activity
-        if (isInBackground) {
-            isInBackground = false
-        }
+        isInBackground = false
         Pushdy.getActivityLifeCycleDelegate()?.onActivityResumed(activity)
         val intent = activity?.intent
         val ready = Pushdy.getDelegate()?.readyForHandlingNotification() ?: true
@@ -105,14 +110,19 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     }
 
     override fun onActivityStopped(activity: Activity?) {
+        isInBackground = true
+        lastSession = System.currentTimeMillis()
+        Log.d("PDYLifeCycleHandler", "onActivityStopped: "+activity?.localClassName)
         Pushdy.getActivityLifeCycleDelegate()?.onActivityStopped(activity)
     }
 
     override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {
+        Log.d("PDYLifeCycleHandler", "onActivitySaveInstanceState: "+activity?.localClassName)
         Pushdy.getActivityLifeCycleDelegate()?.onActivitySaveInstanceState(activity, outState)
     }
 
     override fun onActivityDestroyed(activity: Activity?) {
+        isInBackground = true
         if (curActivity == activity) {
             curActivity = null
         }

@@ -170,6 +170,16 @@ open class Pushdy {
             }
         }
 
+        @JvmStatic
+        fun onSession(){
+            val playerID = PDYLocalData.getPlayerID()
+            if (playerID == null) {
+                createPlayer()
+            } else {
+                createNewSession()
+            }
+        }
+
         private fun initialize() {
             if (_context != null) {
                 val deviceID = PDYDeviceInfo.deviceID(_context!!)
@@ -178,14 +188,6 @@ open class Pushdy {
 
                 if (_context!! is Application) {
                     PDYLifeCycleHandler.listen(_context!! as Application)
-                }
-
-                val playerID = PDYLocalData.getPlayerID()
-                if (playerID == null) {
-                    createPlayer()
-                }
-                else {
-                    createNewSession()
                 }
             }
             else {
@@ -206,6 +208,7 @@ open class Pushdy {
                     val token = task.result?.token
                     if (token != null) {
                         Log.d(TAG, "initializeFirebaseInstanceID token: ${token!!}")
+                        val lastToken = PDYLocalData.getDeviceToken()
                         PDYLocalData.setDeviceToken(token!!)
                         getDelegate()?.onRemoteNotificationRegistered(token!!)
                         val playerID = PDYLocalData.getPlayerID()
@@ -213,7 +216,9 @@ open class Pushdy {
                             createPlayer()
                         }
                         else {
-                            editPlayer()
+                            if (lastToken != token){
+                                editPlayer()
+                            }
                         }
                     }
                 })
