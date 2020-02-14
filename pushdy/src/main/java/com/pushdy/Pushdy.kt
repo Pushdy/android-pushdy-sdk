@@ -171,12 +171,16 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun onSession(){
+        fun onSession(force: Boolean){
             val playerID = PDYLocalData.getPlayerID()
             if (playerID == null) {
                 createPlayer()
             } else {
-                createNewSession()
+                if (force){
+                    editPlayer()
+                } else if (!updatePlayerIfNeeded()){
+                    createNewSession()
+                }
             }
         }
 
@@ -233,7 +237,7 @@ open class Pushdy {
             }, 0, UPDATE_ATTRIBUTES_INTERVAL)
         }
 
-        private fun updatePlayerIfNeeded() {
+        private fun updatePlayerIfNeeded(): Boolean {
             if (!_creatingPlayer && !_editingPlayer) {
                 var shouldUpdate = false
                 if (PDYLocalData.attributesHasChanged()) {
@@ -243,24 +247,11 @@ open class Pushdy {
                 if (shouldUpdate) {
                     if (PDYLocalData.isFetchedAttributes()) {
                         editPlayer()
-                    }
-                    else {
-                        //getAttributes({ response:JsonElement? ->
-                        //    editPlayer()
-                        //}, { code:Int, message:String? ->
-                        //    editPlayer()
-                        //})
+                        return true
                     }
                 }
-                // Ignore fetching new attribute
-//                else {
-//                    getAttributes({ response:JsonElement? ->
-//                        // Do no thing
-//                    }, { code:Int, message:String? ->
-//                        // Do no thing
-//                    })
-//                }
             }
+            return false
         }
 
         @JvmStatic

@@ -38,6 +38,10 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         Log.d("PDYLifeCycleHandler", "onActivityCreated: "+activity?.localClassName)
+        if (curActivity == null){
+            Pushdy.onSession(true)
+            isInBackground = false
+        }
         curActivity = activity
         Pushdy.getActivityLifeCycleDelegate()?.onActivityCreated(activity, savedInstanceState)
         val ready = Pushdy.getDelegate()?.readyForHandlingNotification() ?: true
@@ -67,7 +71,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     override fun onActivityStarted(activity: Activity?) {
         if (isInBackground && System.currentTimeMillis() > lastSession + 600000){
-            Pushdy.onSession()
+            Pushdy.onSession(false)
         }
         Log.d("PDYLifeCycleHandler", "onActivityStarted: "+activity?.localClassName)
         isInBackground = false
