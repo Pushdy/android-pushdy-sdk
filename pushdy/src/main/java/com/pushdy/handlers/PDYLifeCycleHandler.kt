@@ -62,6 +62,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
                 Log.d("PDYLifeCycleHandler", "onActivityResumed: push to pending notification: "+notificationStr)
                 Pushdy.pushPendingNotification(notificationStr)
                 intent?.removeExtra("pushdy_notification")
+                intent?.removeExtra("_nms_payload")
             }
             else {
                 Log.d("PDYLifeCycleHandler", "onActivityCreated: no notification in intent")
@@ -106,6 +107,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
                 Log.d("PDYLifeCycleHandler", "onActivityResumed: push to pending notification: "+notificationStr)
                 Pushdy.pushPendingNotification(notificationStr)
                 intent?.removeExtra("pushdy_notification")
+                intent?.removeExtra("_nms_payload")
             }
             else {
                 Log.d("PDYLifeCycleHandler", "onActivityResumed: no notification in intent")
