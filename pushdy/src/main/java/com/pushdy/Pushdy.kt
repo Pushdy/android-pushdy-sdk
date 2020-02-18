@@ -80,6 +80,11 @@ open class Pushdy {
         }
 
         @JvmStatic
+        open fun setNullDeviceID() {
+            _deviceID = "unexpecteddeviceid"
+        }
+
+        @JvmStatic
         fun registerActivityLifecycle(_context:Context) {
             if (_context!! is Application) {
                 PDYLifeCycleHandler.listen(_context!! as Application)
@@ -173,6 +178,7 @@ open class Pushdy {
         @JvmStatic
         fun onSession(force: Boolean){
             val playerID = PDYLocalData.getPlayerID()
+            Log.d(TAG, "PLAYER ID: $playerID")
             if (playerID == null) {
                 createPlayer()
             } else {
@@ -186,7 +192,7 @@ open class Pushdy {
 
         private fun initialize() {
             if (_context != null) {
-                val deviceID = PDYDeviceInfo.deviceID(_context!!)
+                val deviceID = _deviceID
                 Log.d(TAG, "DEVICE ID: $deviceID")
                 PDYLocalData.initWith(_context!!)
 
@@ -311,6 +317,9 @@ open class Pushdy {
         }
 
         internal fun createPlayer() {
+            if (_deviceID == "unexpecteddeviceid"){
+                return
+            }
             var hasTokenBefore = false
             val deviceToken = PDYLocalData.getDeviceToken()
             if (deviceToken != null) {
