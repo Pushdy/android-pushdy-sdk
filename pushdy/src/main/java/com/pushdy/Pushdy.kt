@@ -76,10 +76,14 @@ open class Pushdy {
 
         @JvmStatic
         open fun setDeviceID(deviceID:String) {
+            var check = false
             if (_deviceID == "unexpecteddeviceid"){
-                onSession(true)
+                check = true
             }
             _deviceID = deviceID
+            if (check){
+                onSession(true)
+            }
         }
 
         @JvmStatic
