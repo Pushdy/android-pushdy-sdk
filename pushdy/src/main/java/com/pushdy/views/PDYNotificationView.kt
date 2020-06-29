@@ -113,14 +113,20 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
                 PDYDownloadImageHandler(_thumbIV!!).execute(mediaKey)
             }
 
-            _thumbIV?.post(Runnable {
-                if (showImage) {
-                    _thumbIV?.visibility = View.VISIBLE
-                }
-                else {
-                    _thumbIV?.visibility = View.GONE
-                }
-            })
+//            _thumbIV?.post(Runnable {
+//                if (showImage) {
+//                    _thumbIV?.visibility = View.VISIBLE
+//                }
+//                else {
+//                    _thumbIV?.visibility = View.GONE
+//                }
+//            })
+            if (showImage) {
+                _thumbIV?.visibility = View.VISIBLE
+            }
+            else {
+                _thumbIV?.visibility = View.GONE
+            }
         }
 
         if (Pushdy.isPushBannerAutoDismiss()) {
