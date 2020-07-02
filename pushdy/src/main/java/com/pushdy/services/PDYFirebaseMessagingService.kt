@@ -12,24 +12,27 @@ import com.google.gson.Gson
 import android.util.Base64
 
 open class PDYFirebaseMessagingService : FirebaseMessagingService() {
-    private val TAG = "FCMService"
+    private val TAG = "PDYFCMService"
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        Log.d(TAG, "onMessageReceived HAS CALLED")
+        Log.d(TAG, "onMessageReceived HAS CALLED with msg type: " + message.messageType)
+
         // Process received message
-        val data = message.data
+        val data:Map<String, Any> = message.data
+
         if (data != null) {
-            val title = message.notification?.title ?: ""
-            val body = message.notification?.body ?: ""
-            var image = message.notification?.imageUrl.toString() ?: ""
+            // Remember to fallback into data message, instead of notification message
+            val title = message.notification?.title ?: data.get("title").toString()
+            val body = message.notification?.body ?: data.get("body").toString()
+            var image = message.notification?.imageUrl.toString()
             if (image == "" || image == "null"){
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
                 val media_key = PDYNotificationView.getCustomMediaKey()
                 image = data.get(media_key).toString()
                 if (image == null || image == "null"){
-                    image = ""
+                    image = data.get("image").toString()
                 }
             }
 
@@ -42,11 +45,12 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
                 ready = delegate!!.readyForHandlingNotification()
             }
 
+            val nmsPayload = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
             if (ready) { // Process immediately
-                PDYNotificationHandler.process(title, body, image, data, String(Base64.decode(data.get("_nms_payload")!!, Base64.NO_WRAP)))
+                PDYNotificationHandler.process(title, body, image, data, nmsPayload)
             }
             else { // Push notification to pending stack
-                Pushdy.pushPendingNotification(String(Base64.decode(data.get("_nms_payload")!!, Base64.NO_WRAP)))
+                Pushdy.pushPendingNotification(nmsPayload)
             }
         }
     }
