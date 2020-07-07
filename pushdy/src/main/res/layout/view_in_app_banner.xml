@@ -3,6 +3,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="70dp"
+        android:id="@+id/notificationC"
+        android:layout_marginTop="@*android:dimen/status_bar_height"
         android:background="@drawable/bg_line_bottom_border">
 
     <LinearLayout
@@ -41,6 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
                     android:ellipsize="end"
+                    android:textColor="#000"
                     android:maxLines="1"
                     android:text="title" />
 
@@ -49,6 +52,7 @@
                     style="@style/TextAppearance.Compat.Notification.Line2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="#000"
                     android:ellipsize="end"
                     android:maxLines="2"
                     android:text="content" />

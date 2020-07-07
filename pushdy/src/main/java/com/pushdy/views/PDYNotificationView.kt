@@ -14,6 +14,7 @@ import com.pushdy.PDYConstant
 import com.pushdy.Pushdy
 import com.pushdy.R
 import android.util.Log
+import android.widget.RelativeLayout
 import com.pushdy.core.entities.PDYParam
 import com.pushdy.handlers.PDYDownloadImageHandler
 
@@ -31,6 +32,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     private var _rootView:View? = null
     private var _badge:View? = null
     private var _onTap:(() -> Unit?)? = null
+    private var _notificationC:RelativeLayout? = null
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -42,12 +44,23 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         _titleTV = view.findViewById(R.id.tvTitle)
         _contentTV = view.findViewById(R.id.tvContent)
         _thumbIV = view.findViewById(R.id.ivThumb)
-
+        _notificationC = view.findViewById(R.id.notificationC)
         _badge?.setOnClickListener(this)
         val closeBtn:ImageView = view.findViewById(R.id.btnClose)
         closeBtn.setOnClickListener(OnClickListener { view ->
             hideView()
         })
+        /**
+         * Get status bar height to set layout in order to make notification below status bar.
+         */
+        var result = 0;
+        val resourceId = resources.getIdentifier("status_bar_height","dimen","android");
+        if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId);
+        }
+        var layoutParams:FrameLayout.LayoutParams = FrameLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT)
+        layoutParams.setMargins(0,result,0,0)
+        _notificationC!!.layoutParams = layoutParams
     }
 
     companion object {
@@ -101,6 +114,7 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         if (_notification!!.containsKey("title")) {
             _titleTV?.text = _notification!!["title"] as String
         }
+        Log.d("RNPushdy title:", notification["body"] as String);
         if (_notification!!.containsKey("body")) {
             _contentTV?.text = _notification!!["body"] as String
         }
