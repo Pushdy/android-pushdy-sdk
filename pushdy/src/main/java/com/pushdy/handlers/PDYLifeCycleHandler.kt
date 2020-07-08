@@ -23,6 +23,17 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
         private var lastSession = 0L
         var curActivity:Activity? = null
 
+        /**
+         * The first activities in the stack
+         * I intent to access Pushdy from this activity
+         *
+         * Issue:
+         *      http://redmine.mobiletech.vn/issues/5911
+         *      If user is in another activity > press InAppBanner View > Do not go to target page because reactContext is on MainActivity
+         * Solution: Bring up MainActivity first then handle push notification
+         */
+        var rootActivity:Activity? = null
+
         fun listen(application:Application?) {
             if (curActivity == null){
                 if (sharedInstance == null) {
@@ -38,6 +49,11 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
 
     override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
         Log.d("PDYLifeCycleHandler", "onActivityCreated: "+activity?.localClassName)
+
+        if (rootActivity == null) {
+            rootActivity = activity
+        }
+
         if (curActivity == null){
             Pushdy.onSession(true)
             isInBackground = false
