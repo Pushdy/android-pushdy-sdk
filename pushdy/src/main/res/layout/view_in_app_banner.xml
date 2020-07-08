@@ -4,7 +4,6 @@
         android:layout_height="wrap_content"
         android:minHeight="70dp"
         android:id="@+id/notificationC"
-        android:layout_marginTop="@*android:dimen/status_bar_height"
         android:background="@drawable/bg_line_bottom_border">
 
     <LinearLayout
