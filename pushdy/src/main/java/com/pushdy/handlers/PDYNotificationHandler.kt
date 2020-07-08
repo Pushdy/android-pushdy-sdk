@@ -71,6 +71,7 @@ internal class PDYNotificationHandler {
                     notificationBuilder.setSmallIcon(smallIcon!!)
                     notificationBuilder.setContentTitle(title)
                     notificationBuilder.setContentText(body)
+                    notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
                     notificationBuilder.setAutoCancel(true)
                     notificationBuilder.setSound(soundUri)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
