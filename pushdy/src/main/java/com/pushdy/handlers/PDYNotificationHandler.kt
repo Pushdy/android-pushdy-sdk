@@ -19,6 +19,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.gson.Gson
 import com.pushdy.PDYConstant
@@ -130,6 +131,32 @@ internal class PDYNotificationHandler {
 //            LocalBroadcastManager.getInstance(context.applicationContext).sendBroadcast(intent)
 //        }
 
+        fun startOriginActivity() {
+            val activity = PDYLifeCycleHandler.rootActivity!!
+
+            val context = Pushdy.getContext()!!
+            // val activity = getActivity(context)
+            // val am = context.getSystemService(Context.ACTIVITY_SERVICE)
+
+            val intent = Intent(context, activity.javaClass).apply {
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("testField", "Bring back MainActivity...")
+            }
+
+            startActivity(context, intent, null)
+        }
+
+//        // How to get activity from context: https://stackoverflow.com/a/46205896/4984888
+//        fun getActivity(context: Context?): Activity? {
+//            if (context == null) {
+//                return null
+//            } else if (context is ContextWrapper) {
+//                return context as? Activity ?: getActivity(context.baseContext)
+//            }
+//
+//            return null
+//        }
+
         fun showInAppNotification(context: Context, title: String, body:String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
             if (curActivity != null) {
@@ -143,7 +170,11 @@ internal class PDYNotificationHandler {
 
                 if (bannerView is PDYPushBannerActionInterface) {
                     (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
-                        Log.d("Pushdy", "In App Banner Notification has tapped")
+                        Log.d("PDYNotificationHandler", "In App Banner Notification has tapped")
+
+                        // Bring MainActivity (Pushdy is running on) to top
+                        startOriginActivity()
+
                         Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
                         null
                     })
