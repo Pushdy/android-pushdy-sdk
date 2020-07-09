@@ -307,7 +307,8 @@ open class PDYLocalData {
             else {
                 changed = true
             }
-            return false
+
+            return changed
         }
 
         @JvmStatic
