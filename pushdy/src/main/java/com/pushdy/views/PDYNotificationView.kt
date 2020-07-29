@@ -120,7 +120,11 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         }
         Log.d("RNPushdy title:", notification["body"] as String);
         if (_notification!!.containsKey("body")) {
-            _contentTV?.text = _notification!!["body"] as String
+            if (_notification!!["body"] != null && _notification!!["body"] != "null") {
+                _contentTV?.text = _notification!!["body"] as String
+            } else {
+                _contentTV?.visibility = View.GONE
+            }
         }
 
         if (_thumbIV != null && _notification!!.containsKey("image")) {
