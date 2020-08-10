@@ -40,24 +40,46 @@ internal class PDYNotificationHandler {
             if (context != null) {
                 val visible = PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName())
                 val fromState = if (visible) PDYConstant.AppState.ACTIVE else PDYConstant.AppState.BACKGROUND
-                Pushdy.getDelegate()?.onNotificationReceived(jsonData, fromState)
+
                 if (PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName()) && Pushdy.getBadgeOnForeground()) {
 //                    sendBoardcast(context, title, body, data)
                     showInAppNotification(context, title, body, image, data, jsonData)
                 }
                 else {
+                    Log.d("PDYNotificationHandler", "process(): prepare to notify")
                     notify(context!!, title, body, image, data, jsonData)
                 }
+
+                Log.d("PDYNotificationHandler", "process(): send onNotificationReceived to JS")
+                Pushdy.getDelegate()?.onNotificationReceived(jsonData, fromState)
             }
         }
 
         fun notify(context:Context, title: String, body: String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
-            if (curActivity != null) {
+            // Log.d("PDYNotificationHandler", "notify().curActivity != null : ${curActivity != null}")
+
+
+            var intentClass: Class<*>?
+            if (curActivity == null) {
+                intentClass = PDYUtil.getMainActivityClass(context)
+                if (intentClass == null) {
+                    Log.e("PDYNotificationHandler", "No activity class found for the notification")
+                }
+                // Log.d("PDYNotificationHandler", "notify().intentClass from getMainActivityClass: ${intentClass?.canonicalName}")
+            } else {
+                intentClass = curActivity.javaClass
+                // Log.d("PDYNotificationHandler", "notify().intentClass from curActivity: ${intentClass?.canonicalName}")
+            }
+
+
+            if (intentClass != null) {
+
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 var notification = Pushdy.getDelegate()?.customNotification(title, body, image, data)
                 if (notification == null) {
-                    val intent = Intent(context, curActivity.javaClass)
+                    val intent = Intent(context, intentClass)
+
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     intent.putExtra("pushdy_notification", jsonData)
 
@@ -94,6 +116,8 @@ internal class PDYNotificationHandler {
                     notification = notificationBuilder.build()
                 } else {
                 }
+
+                // Log.d("PDYNotificationHandler", "notificationManager.notify notification.title: $title")
                 notificationManager.notify(Date().getTime().toInt(), notification)
             }
         }
