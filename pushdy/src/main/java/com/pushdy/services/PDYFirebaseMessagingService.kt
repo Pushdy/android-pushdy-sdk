@@ -21,12 +21,16 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
 
         // Process received message
         val data:Map<String, Any> = message.data
+        val n = message.notification
+
 
         if (data != null) {
             // Remember to fallback into data message, instead of notification message
-            val title = message.notification?.title ?: data.get("title").toString()
-            val body = message.notification?.body ?: data.get("body").toString()
-            var image = message.notification?.imageUrl.toString()
+            val title = n?.title ?: data.get("title").toString()
+            val body = n?.body ?: data.get("body").toString()
+            var image = n?.imageUrl?.toString() ?: ""
+
+            // Fall back to custom media_key
             if (image == "" || image == "null"){
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
                 val media_key = PDYNotificationView.getCustomMediaKey()

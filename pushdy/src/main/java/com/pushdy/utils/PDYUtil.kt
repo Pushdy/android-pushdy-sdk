@@ -22,5 +22,19 @@ open class PDYUtil {
             }
             return visible
         }
+
+
+        fun getMainActivityClass(context: Context): Class<*>? {
+            val packageName = context.packageName
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
+            val className = launchIntent!!.getComponent()!!.getClassName()
+            try {
+                return Class.forName(className)
+            } catch (e: ClassNotFoundException) {
+                e.printStackTrace()
+                return null
+            }
+        }
+
     }
 }
