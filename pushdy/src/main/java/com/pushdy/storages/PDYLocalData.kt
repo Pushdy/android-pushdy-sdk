@@ -447,19 +447,27 @@ open class PDYLocalData {
 
         @JvmStatic
         fun getPendingTrackOpenNotiIds(): List<String>? {
-            val a = getValue(PENDING_TRACKING_OPEN_IDS)
-            var str: String
-            if (a != null) {
-                str = a.toString()
-                return str.split(',')
+            if (_context != null) {
+                val a = PDYStorage.getString(_context!!, PENDING_TRACKING_OPEN_IDS)
+                var str: String
+                if (a != null) {
+                    str = a.toString()
+                    return str.split(',')
+                } else {
+                    return ArrayList()
+                }
             } else {
-                return ArrayList()
+                throw noContextWasSetException()
             }
         }
 
         @JvmStatic
         fun setPendingTrackOpenNotiIds(items: List<String>) {
-            setValue(PENDING_TRACKING_OPEN_IDS, items.joinToString(separator = ","))
+            if (_context != null) {
+                PDYStorage.setString(_context!!, PENDING_TRACKING_OPEN_IDS, items.joinToString(separator = ","))
+            } else {
+                throw noContextWasSetException()
+            }
         }
 
 
