@@ -494,13 +494,14 @@ open class Pushdy {
             // Delay flushing queue
             // Empty queue on success
             // NOTE: You must do this in non-blocking mode to ensure program will continue to run without any dependant on this code
-//            val delayInMs:Long = (1L..125L).random() * 1000
-            val delayInMs:Long = 8L * 1000
+            val delayInMs:Long = (1L..125L).random() * 1000
+            // val delayInMs:Long = 8L * 1000
             trackOpenedWithRetry(delayInMs)
         }
 
         internal fun trackOpenedWithRetry(delayInMs: Long) {
-            Log.d(TAG, "trackOpenedWithRetry: delayInMs: $delayInMs")
+            val verbose = false
+            if (verbose) Log.d(TAG, "trackOpenedWithRetry: delayInMs: $delayInMs")
 
             // Delay flushing queue
             // Empty queue on success
@@ -510,24 +511,24 @@ open class Pushdy {
             pendingTrackingOpenedTimerTask?.cancel()   // You need to test the case: Cancel existing task if another task was schedule, to avoid duplication tracking
             pendingTrackingOpenedTimerTask = object : TimerTask() {
                 override fun run() {
-                    Log.d(TAG, "trackOpenedWithRetry: Process tracking queue after delay ${delayInMs}s | Ids=${pendingTrackingOpenedItems.joinToString(",")}")
+                    if (verbose) Log.d(TAG, "trackOpenedWithRetry: Process tracking queue after delay ${delayInMs}s | Ids=${pendingTrackingOpenedItems.joinToString(",")}")
 
                     val playerID: String? = PDYLocalData.getPlayerID()
                     if (playerID.isNullOrBlank()) {
                         // retry after 10 seconds
                         trackOpenedWithRetry(10000)
-                        Log.d(TAG, "trackOpenedWithRetry: playerID empty, trying to retry after ${10}s")
+                        if (verbose) Log.d(TAG, "trackOpenedWithRetry: playerID empty, trying to retry after ${10}s")
                     } else {
                         // NOTE: If api request was failed, we don't intend to fire again, ignore it
                         trackOpenedList(playerID, pendingTrackingOpenedItems, { response ->
-                            Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
+                            if (verbose) Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
                             // Empty queue on success
                             pendingTrackingOpenedItems = mutableListOf()
                             PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
                             // End
                             null
                         }, { code, message ->
-                            Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
+                            if (verbose) Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
                             null
                         })
                     }
