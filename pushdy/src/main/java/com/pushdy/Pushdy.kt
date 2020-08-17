@@ -80,6 +80,8 @@ open class Pushdy {
          * It must be saved here and push by batch later by schedule.
          * Duplication items support + preserve the ordering
          */
+        private var pendingTrackingOpenedTimer: Timer = Timer("TrackingOpenedTimer", false)
+        private var pendingTrackingOpenedTimerTask: TimerTask? = null
         private var pendingTrackingOpenedItems: MutableList<String> = mutableListOf()
 
 
@@ -478,52 +480,61 @@ open class Pushdy {
          * - [x] Can send by batch if queue has multiple items
          *
          * - [x] Restore this queue when app open / app open by notification => Avoid overriten
+         * - [x] In case of schedule is running => Cancel the prev schedule if you fire new schedule
          *
          * Known issues:
          * - Open app by clicking a notification cause pendingTrackingOpenedItems has only 1 notiId, lost all ids in storage
          */
         internal fun trackOpenedLazy(notificationID: String) {
-            Log.d(TAG, "trackOpenedLazy save notiId={$notificationID} to tracking queue")
+            Log.d(TAG, "trackOpenedLazy save notiId={$notificationID} to tracking queue pendingTrackingOpenedItems(before): " + pendingTrackingOpenedItems.joinToString(","))
+
             // Save to queue + localStorage
             pendingTrackingOpenedItems.add(notificationID)
             PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
             // Delay flushing queue
             // Empty queue on success
             // NOTE: You must do this in non-blocking mode to ensure program will continue to run without any dependant on this code
-            val delayInMs:Long = (1L..125L).random() * 1000
-            trackOpenedWithRetry(pendingTrackingOpenedItems, delayInMs)
+//            val delayInMs:Long = (1L..125L).random() * 1000
+            val delayInMs:Long = 8L * 1000
+            trackOpenedWithRetry(delayInMs)
         }
 
-        internal fun trackOpenedWithRetry(notificationIDs: List<String>, delayInMs: Long) {
-            Log.d(TAG, "trackOpenedWithRetry: notificationIDs: ${notificationIDs}, delayInMs: $delayInMs")
+        internal fun trackOpenedWithRetry(delayInMs: Long) {
+            Log.d(TAG, "trackOpenedWithRetry: delayInMs: $delayInMs")
 
             // Delay flushing queue
             // Empty queue on success
             // NOTE: You must do this in non-blocking mode to ensure program will continue to run without any dependant on this code
             // Tested in background: This Timer still run when app is in background, not sure for Xiaomi 3
             // Tested in closed state then open by push:
-            Timer("TrackingOpenedTimer", false).schedule(delayInMs) {
-                Log.d(TAG, "trackOpenedWithRetry: Process tracking queue after delay ${delayInMs}s | Ids=${pendingTrackingOpenedItems.joinToString(",")}")
+            pendingTrackingOpenedTimerTask?.cancel()   // You need to test the case: Cancel existing task if another task was schedule, to avoid duplication tracking
+            pendingTrackingOpenedTimerTask = object : TimerTask() {
+                override fun run() {
+                    Log.d(TAG, "trackOpenedWithRetry: Process tracking queue after delay ${delayInMs}s | Ids=${pendingTrackingOpenedItems.joinToString(",")}")
 
-                val playerID: String? = PDYLocalData.getPlayerID()
-                if (playerID.isNullOrBlank()) {
-                    // retry after 10 seconds
-                    trackOpenedWithRetry(notificationIDs, 10000)
-                } else {
-                    // NOTE: If api request was failed, we don't intend to fire again, ignore it
-                    trackOpenedList(playerID, notificationIDs, { response ->
-                        Log.d(TAG, "trackOpenedWithRetry: {$notificationIDs} successfully")
-                        // Empty queue on success
-                        pendingTrackingOpenedItems = mutableListOf()
-                        PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
-                        // End
-                        null
-                    }, { code, message ->
-                        Log.e(TAG, "trackOpenedWithRetry: error: ${code}, messag:${message}")
-                        null
-                    })
+                    val playerID: String? = PDYLocalData.getPlayerID()
+                    if (playerID.isNullOrBlank()) {
+                        // retry after 10 seconds
+                        trackOpenedWithRetry(10000)
+                        Log.d(TAG, "trackOpenedWithRetry: playerID empty, trying to retry after ${10}s")
+                    } else {
+                        // NOTE: If api request was failed, we don't intend to fire again, ignore it
+                        trackOpenedList(playerID, pendingTrackingOpenedItems, { response ->
+                            Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
+                            // Empty queue on success
+                            pendingTrackingOpenedItems = mutableListOf()
+                            PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
+                            // End
+                            null
+                        }, { code, message ->
+                            Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
+                            null
+                        })
+                    }
                 }
             }
+
+            pendingTrackingOpenedTimer.schedule(pendingTrackingOpenedTimerTask, delayInMs)
         }
 
 
@@ -531,7 +542,10 @@ open class Pushdy {
         fun restorePendingTrackingOpenedItems() {
             var items: List<String>? = PDYLocalData.getPendingTrackOpenNotiIds()
             if (items != null) {
+                Log.d(TAG, "restorePendingTrackingOpenedItems: Restored items: " + items.joinToString(","))
                 pendingTrackingOpenedItems.addAll(items)
+            } else {
+                Log.d(TAG, "restorePendingTrackingOpenedItems: No pending tracking open")
             }
         }
 

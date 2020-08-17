@@ -451,10 +451,10 @@ open class PDYLocalData {
             var str: String
             if (a != null) {
                 str = a.toString()
+                return str.split(',')
             } else {
-                str = ""
+                return ArrayList()
             }
-            return str.split(',')
         }
 
         @JvmStatic
