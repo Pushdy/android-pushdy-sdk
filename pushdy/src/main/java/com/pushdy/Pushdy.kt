@@ -595,8 +595,8 @@ open class Pushdy {
         internal fun trackOpenedList(playerID: String, notificationIDs: List<String>, completion:((response: JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) {
             if (_context != null) {
                 if (_clientKey != null) {
-                    val notification = PDYNotification(_context!!, _clientKey!!, _deviceID)
-                    notification.trackOpened(playerID, notificationIDs, completion, failure)
+                    val player = PDYPlayer(_context!!, _clientKey!!, _deviceID)
+                    player.trackOpened(playerID, notificationIDs, completion, failure)
                 } else {
                     throw noClientKeyException()
                 }

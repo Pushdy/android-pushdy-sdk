@@ -83,5 +83,31 @@ open class PDYPlayer(val ctx: Context, clientKey : String, deviceID:String?) : P
         }
     }
 
+    open fun trackOpened(playerID:String, notificationIDs: List<String>, completion:((response:JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) : PDYRequest {
+        if (this.context != null) {
+            if (notificationIDs.isEmpty()) {
+                throw Exception("PDYNotification: notificationIDs list is empty")
+            }
+            if (playerID.isBlank()) {
+                throw Exception("PDYNotification: playerID isBlank")
+            }
 
+            val request = PDYRequest(context!!)
+            var newParams: JsonObject?
+            var mergedParams = HashMap<String, Any>()
+            mergedParams.put("platform", "android")
+            mergedParams.put("notifications", notificationIDs)
+            newParams = Gson().toJsonTree(mergedParams).asJsonObject
+
+            val url = "${this.url()}/$playerID/track"
+            request.put(url, this.defaultHeaders(), newParams, { response: JsonElement? ->
+                completion?.invoke(response)
+            }, { code: Int, message: String? ->
+                failure?.invoke(code, message)
+            })
+            return request
+        } else {
+            throw this.noContextWasSetException()
+        }
+    }
 }
