@@ -11,6 +11,10 @@ open class PDYNotification(val ctx: Context, clientKey : String, deviceID:String
         return "/notification"
     }
 
+    /**
+     * This is /notification/:id/track for single notification tracking
+     * For batch tracking, please use /player/:id/track on PDYPlayer instead
+     */
     open fun trackOpened(playerID:String, notificationID:String, completion:((response:JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) : PDYRequest {
         if (this.context != null) {
             val request = PDYRequest(context!!)
