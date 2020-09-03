@@ -520,17 +520,21 @@ open class Pushdy {
                         if (verbose) Log.d(TAG, "trackOpenedWithRetry: playerID empty, trying to retry after ${10}s")
                     } else {
                         // NOTE: If api request was failed, we don't intend to fire again, ignore it
-                        trackOpenedList(playerID, pendingTrackingOpenedItems, { response ->
-                            if (verbose) Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
-                            // Empty queue on success
-                            pendingTrackingOpenedItems = mutableListOf()
-                            PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
-                            // End
-                            null
-                        }, { code, message ->
-                            if (verbose) Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
-                            null
-                        })
+                        if (pendingTrackingOpenedItems.size < 1) {
+                            if (verbose) Log.d(TAG, "trackOpenedWithRetry: Skip because pendingTrackingOpenedItems empty")
+                        } else {
+                            trackOpenedList(playerID, pendingTrackingOpenedItems, { response ->
+                                if (verbose) Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
+                                // Empty queue on success
+                                pendingTrackingOpenedItems = mutableListOf()
+                                PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
+                                // End
+                                null
+                            }, { code, message ->
+                                if (verbose) Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
+                                null
+                            })
+                        }
                     }
                 }
             }
@@ -597,7 +601,11 @@ open class Pushdy {
             if (_context != null) {
                 if (_clientKey != null) {
                     val player = PDYPlayer(_context!!, _clientKey!!, _deviceID)
-                    player.trackOpened(playerID, notificationIDs, completion, failure)
+                    try {
+                        player.trackOpened(playerID, notificationIDs, completion, failure)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "trackOpenedList: error: " + e.message)
+                    }
                 } else {
                     throw noClientKeyException()
                 }
