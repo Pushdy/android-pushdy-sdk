@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.pushdy.core.network.PDYRequest
+import com.pushdy.core.network.PDYRequestSingleton
 
 open class PDYNotification(val ctx: Context, clientKey : String, deviceID:String?) : PDYEntity(ctx, clientKey, deviceID) {
     override fun router(): String {
@@ -15,9 +15,9 @@ open class PDYNotification(val ctx: Context, clientKey : String, deviceID:String
      * This is /notification/:id/track for single notification tracking
      * For batch tracking, please use /player/:id/track on PDYPlayer instead
      */
-    open fun trackOpened(playerID:String, notificationID:String, completion:((response:JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) : PDYRequest {
+    open fun trackOpened(playerID:String, notificationID:String, completion:((response:JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) : PDYRequestSingleton {
         if (this.context != null) {
-            val request = PDYRequest(context!!)
+            val request = PDYRequestSingleton.getInstance(context!!)
             var newParams: JsonObject?
             var mergedParams = HashMap<String, Any>()
             mergedParams.put("platform", "android")

@@ -7,6 +7,17 @@ import com.google.gson.JsonElement
 import kotlin.collections.HashMap
 
 
+/**
+ * @deprecated
+ *
+ * Migrated to PDYRequestSingleton
+ *
+ * From:
+ *      val request = PDYRequest(context!!)
+ *
+ * To:
+ *      val request = PDYRequestSingleton.getInstance(context!!)
+ */
 class PDYRequest {
     var defaultTimeout: Int = 30 * 1000
     var timeout = defaultTimeout
