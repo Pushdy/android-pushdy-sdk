@@ -34,7 +34,17 @@ import java.util.Date;
 
 internal class PDYNotificationHandler {
     private constructor()
+
     companion object {
+        /*
+        _useSdkHandler == true: Pushdy will use built-in InAppBanner to handle how inappbanner show and it's interaction
+        _useSdkHandler == false: Pushdy will pass data into another handler, that handler will handle in app banner UI, but interaction still handled by SDK. Eg: Use JS thread to show banner on react-native
+        */
+        private var _useSdkHandler: Boolean  = true
+        private var _customBannerData: Map<String, Any>? = null
+        private var _customBannerActions: (() -> Unit?)? = null
+
+
         fun process(title:String, body:String, image:String, data:Map<String, Any>, jsonData: String) {
             val context = Pushdy.getContext()
             if (context != null) {
@@ -192,16 +202,32 @@ internal class PDYNotificationHandler {
                 notification.put("body", body)
                 notification.put("image", image)
 
+                val onTapNotification = {
+                    Log.d("PDYNotificationHandler", "In App Banner Notification has tapped")
+
+                    // Bring MainActivity (Pushdy is running on) to top
+                    startOriginActivity()
+
+                    Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
+                    null
+                }
+
+
+                // Handle custom in app banner view in react-native thread
+                if (!_useSdkHandler) {
+                    // Store data to execute it later
+                     _customBannerData = notification
+                     _customBannerActions = onTapNotification
+
+                    // Stop execution
+                    return
+                }
+
+
+
                 if (bannerView is PDYPushBannerActionInterface) {
-                    (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
-                        Log.d("PDYNotificationHandler", "In App Banner Notification has tapped")
-
-                        // Bring MainActivity (Pushdy is running on) to top
-                        startOriginActivity()
-
-                        Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
-                        null
-                    })
+                    // show() notification behavior depend on _useCustomInAppBanner
+                    (bannerView as PDYPushBannerActionInterface).show(notification, onTap = onTapNotification)
                 }
 
                 // Add and show banner
@@ -241,5 +267,33 @@ internal class PDYNotificationHandler {
         }
 
 
+        fun useSDKHandler(enabled: Boolean) {
+            _useSdkHandler = enabled
+        }
+
+        fun handleCustomInAppBannerPressed(notificationId: String) {
+            if (_useSdkHandler) {
+                return
+            }
+
+            try {
+                val nId: String = _customBannerData!!["_notification_id"] as String
+                if (notificationId.equals(nId)) {
+                    // trigger actions
+                    _customBannerActions?.invoke()
+
+                    // clean
+                    cleanCustomBannerData(0.1)
+                } else {
+                    print("Id is not identical: " + notificationId + ", " + nId)
+                }
+            } catch (e: Exception) {
+                print(e)
+            }
+        }
+
+        private fun cleanCustomBannerData(delay: Double) {
+            // Should clean only if you sure there's no condition racing
+        }
     }
 }

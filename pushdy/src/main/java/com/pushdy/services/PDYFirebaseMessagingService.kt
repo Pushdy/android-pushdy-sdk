@@ -10,6 +10,8 @@ import com.pushdy.storages.PDYLocalData
 import com.pushdy.views.PDYNotificationView
 import com.google.gson.Gson
 import android.util.Base64
+import com.google.gson.JsonElement
+import org.json.JSONObject
 
 open class PDYFirebaseMessagingService : FirebaseMessagingService() {
     private val TAG = "PDYFCMService"
@@ -49,7 +51,19 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
                 ready = delegate!!.readyForHandlingNotification()
             }
 
-            val nmsPayload = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
+             val nmsPayloadOrigin = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
+//            val nmsPayloadObj: MutableMap<String, Any> = data.toMutableMap()
+
+            /**
+             * nmsPayloadOrigin does not fallback image logic above, so we need to modify it before passing to any where else
+             */
+            val gson = Gson()
+            val nmsPayloadObj = gson.fromJson(nmsPayloadOrigin, JsonElement::class.java).asJsonObject
+            val nested = nmsPayloadObj.get("data").asJsonObject
+            nested?.addProperty("_nms_image", image)
+
+            val nmsPayload = nmsPayloadObj.toString()
+
             if (ready) { // Process immediately
                 PDYNotificationHandler.process(title, body, image, data, nmsPayload)
             }

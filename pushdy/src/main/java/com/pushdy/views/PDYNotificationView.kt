@@ -34,6 +34,8 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     private var _onTap:(() -> Unit?)? = null
     private var _notificationC:RelativeLayout? = null
 
+
+
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -111,6 +113,8 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         //        }
         //    }
         //})
+
+
         if (_notification!!.containsKey("title")) {
             if (_notification!!["title"] != null && _notification!!["title"] != "null") {
                 _titleTV?.text = _notification!!["title"] as String
