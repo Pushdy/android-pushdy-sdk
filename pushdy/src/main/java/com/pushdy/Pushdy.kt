@@ -19,7 +19,9 @@ import com.pushdy.core.entities.PDYParam
 import com.pushdy.core.entities.PDYPlayer
 import com.pushdy.core.ultilities.PDYDeviceInfo
 import com.pushdy.handlers.PDYLifeCycleHandler
+import com.pushdy.handlers.PDYNotificationHandler
 import com.pushdy.storages.PDYLocalData
+import com.pushdy.views.PDYNotificationView
 import com.pushdy.views.PDYPushBannerActionInterface
 import java.util.*
 import kotlin.Exception
@@ -841,6 +843,16 @@ open class Pushdy {
             else {
                 throw Exception("[Pushdy] Your custom view must implement PDYPushBannerActionInterface interface")
             }
+        }
+
+        @JvmStatic
+        fun useSDKHandler(enabled: Boolean) {
+            PDYNotificationHandler.useSDKHandler(enabled)
+        }
+
+        @JvmStatic
+        fun handleCustomInAppBannerPressed(notificationId: String) {
+            PDYNotificationHandler.handleCustomInAppBannerPressed(notificationId)
         }
 
     }
