@@ -33,17 +33,21 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
             var image = n?.imageUrl?.toString() ?: ""
 
             // Fall back to custom media_key
-            if (image == "" || image == "null"){
+            if (image == "" || image == "null") {
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
                 val media_key = PDYNotificationView.getCustomMediaKey()
                 image = data.get(media_key).toString()
-                if (image == null || image == "null"){
+                if (image == null || image == "null") {
                     image = data.get("image").toString()
                 }
             }
+            // normalize
+            if (image == "null") image = ""
 
             Log.d(TAG, "onMessageReceived title: $title, body: $body, image: $image")
             Log.d(TAG, "data: $data")
+
+
             // Check ready state
             var ready = true
             val delegate = Pushdy.getDelegate()
@@ -51,18 +55,24 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
                 ready = delegate!!.readyForHandlingNotification()
             }
 
-             val nmsPayloadOrigin = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
-//            val nmsPayloadObj: MutableMap<String, Any> = data.toMutableMap()
 
-            /**
-             * nmsPayloadOrigin does not fallback image logic above, so we need to modify it before passing to any where else
-             */
-            val gson = Gson()
-            val nmsPayloadObj = gson.fromJson(nmsPayloadOrigin, JsonElement::class.java).asJsonObject
-            val nested = nmsPayloadObj.get("data").asJsonObject
-            nested?.addProperty("_nms_image", image)
+            var nmsPayload: String = ""
+            val nmsPayloadOrigin = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
 
-            val nmsPayload = nmsPayloadObj.toString()
+            if (image != "") {
+                /**
+                 * nmsPayloadOrigin does not fallback image logic above, so we need to modify it before passing to any where else
+                 */
+                val gson = Gson()
+                val nmsPayloadObj = gson.fromJson(nmsPayloadOrigin, JsonElement::class.java).asJsonObject
+                val nested = nmsPayloadObj.get("data").asJsonObject
+                nested?.addProperty("_nms_image", image)
+
+                nmsPayload = nmsPayloadObj.toString()
+            } else {
+                nmsPayload = nmsPayloadOrigin
+            }
+
 
             if (ready) { // Process immediately
                 PDYNotificationHandler.process(title, body, image, data, nmsPayload)
