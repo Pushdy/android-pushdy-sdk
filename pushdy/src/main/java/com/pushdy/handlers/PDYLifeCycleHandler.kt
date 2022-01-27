@@ -87,10 +87,11 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     }
 
     override fun onActivityStarted(activity: Activity?) {
+        Log.d("PDYLifeCycleHandler", "onActivityStarted: "+activity?.localClassName)
         if (isInBackground && System.currentTimeMillis() > lastSession + 600000){
+            Log.d("PDYLifeCycleHandler", "Attempt to trigger Pushdy.onSession()")
             Pushdy.onSession(false)
         }
-        Log.d("PDYLifeCycleHandler", "onActivityStarted: "+activity?.localClassName)
         isInBackground = false
         Pushdy.getActivityLifeCycleDelegate()?.onActivityStarted(activity)
     }
@@ -200,6 +201,8 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
                     Pushdy.onNotificationOpened(notificationID, notificationStr, fromState)
                     Pushdy.removePendingNotification(notificationID)
                 }
+            } else {
+                Log.d("PDYLifeCycleHandler", "processNotificationFromIntent: Cannot get notification from intent")
             }
         } else {
             Log.d("PDYLifeCycleHandler", "intent null")

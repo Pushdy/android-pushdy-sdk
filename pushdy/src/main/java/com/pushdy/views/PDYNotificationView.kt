@@ -34,6 +34,8 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
     private var _onTap:(() -> Unit?)? = null
     private var _notificationC:RelativeLayout? = null
 
+
+
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -111,12 +113,22 @@ open class PDYNotificationView : FrameLayout, View.OnClickListener, PDYPushBanne
         //        }
         //    }
         //})
+
+
         if (_notification!!.containsKey("title")) {
-            _titleTV?.text = _notification!!["title"] as String
+            if (_notification!!["title"] != null && _notification!!["title"] != "null") {
+                _titleTV?.text = _notification!!["title"] as String
+            } else {
+                _titleTV?.visibility = View.GONE
+            }
         }
         Log.d("RNPushdy title:", notification["body"] as String);
         if (_notification!!.containsKey("body")) {
-            _contentTV?.text = _notification!!["body"] as String
+            if (_notification!!["body"] != null && _notification!!["body"] != "null") {
+                _contentTV?.text = _notification!!["body"] as String
+            } else {
+                _contentTV?.visibility = View.GONE
+            }
         }
 
         if (_thumbIV != null && _notification!!.containsKey("image")) {

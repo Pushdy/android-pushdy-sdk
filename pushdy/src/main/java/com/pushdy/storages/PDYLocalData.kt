@@ -7,6 +7,8 @@ import com.google.gson.JsonObject
 import com.pushdy.PDYConstant
 import com.pushdy.core.entities.PDYParam
 import com.pushdy.core.ultilities.PDYStorage
+import java.util.*
+import kotlin.collections.HashMap
 
 open class PDYLocalData {
     companion object {
@@ -15,6 +17,7 @@ open class PDYLocalData {
         val CHANGED_ATTRIBUTES_STACK = "PUSHDY_CHANGED_ATTRIBUTES_STACK"
         val ATTRIBUTES_SCHEMA = "PUSHDY_ATTRIBUTES_SCHEMA"
         val PREV_ATTRIBUTES_SCHEMA = "PUSHDY_PREV_ATTRIBUTES_SCHEMA"
+        val PENDING_TRACKING_OPEN_IDS = "PENDING_TRACKING_OPEN_IDS"
 
         var _context:Context? = null
 
@@ -440,6 +443,31 @@ open class PDYLocalData {
         @JvmStatic
         fun setPrevAttributeValue(name:String, value:Any) {
             setValue(PREV_ATTTRIBUTE_PREFIX+name, value)
+        }
+
+        @JvmStatic
+        fun getPendingTrackOpenNotiIds(): List<String>? {
+            if (_context != null) {
+                val a = PDYStorage.getString(_context!!, PENDING_TRACKING_OPEN_IDS)
+                var str: String
+                if (a != null) {
+                    str = a.toString()
+                    return str.split(',')
+                } else {
+                    return ArrayList()
+                }
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+        @JvmStatic
+        fun setPendingTrackOpenNotiIds(items: List<String>) {
+            if (_context != null) {
+                PDYStorage.setString(_context!!, PENDING_TRACKING_OPEN_IDS, items.joinToString(separator = ","))
+            } else {
+                throw noContextWasSetException()
+            }
         }
 
 

@@ -19,11 +19,14 @@ import com.pushdy.core.entities.PDYParam
 import com.pushdy.core.entities.PDYPlayer
 import com.pushdy.core.ultilities.PDYDeviceInfo
 import com.pushdy.handlers.PDYLifeCycleHandler
+import com.pushdy.handlers.PDYNotificationHandler
 import com.pushdy.storages.PDYLocalData
+import com.pushdy.views.PDYNotificationView
 import com.pushdy.views.PDYPushBannerActionInterface
 import java.util.*
 import kotlin.Exception
 import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 
 open class Pushdy {
     interface PushdyDelegate {
@@ -74,6 +77,16 @@ open class Pushdy {
         private const val UPDATE_ATTRIBUTES_INTERVAL:Long = 5000
         private val TAG = "Pushdy"
 
+        /**
+         * opened notification ids was not track immediately after user open a notification.
+         * It must be saved here and push by batch later by schedule.
+         * Duplication items support + preserve the ordering
+         */
+        private var pendingTrackingOpenedTimer: Timer = Timer("TrackingOpenedTimer", false)
+        private var pendingTrackingOpenedTimerTask: TimerTask? = null
+        private var pendingTrackingOpenedItems: MutableList<String> = mutableListOf()
+
+
         @JvmStatic
         open fun setDeviceID(deviceID:String) {
             var check = false
@@ -110,6 +123,7 @@ open class Pushdy {
 
             initialize()
             observeAttributesChanged()
+            restoreDataFromStorage()
         }
 
         @JvmStatic
@@ -121,18 +135,34 @@ open class Pushdy {
 
             initialize()
             observeAttributesChanged()
+            restoreDataFromStorage()
+        }
+
+        @JvmStatic
+        fun restoreDataFromStorage() {
+            restorePendingTrackingOpenedItems()
         }
 
         @JvmStatic
         fun onNotificationOpened(notificationID: String, notification: String, fromState: String) {
+            Log.d(TAG, "onNotificationOpened HAS CALLED")
             if (notificationID == _last_notification_id){
+                Log.d(TAG, "onNotificationOpened: Skip because this noti was opened once before: " + notificationID)
                 return
             }
+
             _last_notification_id = notificationID
-            Log.d(TAG, "onNotificationOpened HAS CALLED")
-            val playerID = PDYLocalData.getPlayerID()
-            trackOpened(playerID!!, notificationID)
-            getDelegate()?.onNotificationOpened(notification, fromState)
+
+            try {
+                getDelegate()?.onNotificationOpened(notification, fromState)
+            } catch (e: Exception) {
+
+            }
+
+            /**
+             * Issue: No player ID when JS was not ready, happen at the first time open app, right after app installed.
+             */
+            trackOpenedLazy(notificationID)
         }
 
         @JvmStatic
@@ -456,6 +486,88 @@ open class Pushdy {
             }
         }
 
+        /**
+         * http://redmine.mobiletech.vn/issues/6077
+         * - [x] Save to trackOpenQueue
+         * - [x] Flushing queue and send all pending trackOpenItems after random (1-125) seconds
+         * - [x] Persist this queue to localStorage in case of user kill app before queue was flushed
+         * - [x] Can send by batch if queue has multiple items
+         *
+         * - [x] Restore this queue when app open / app open by notification => Avoid overriten
+         * - [x] In case of schedule is running => Cancel the prev schedule if you fire new schedule
+         *
+         * Known issues:
+         * - Open app by clicking a notification cause pendingTrackingOpenedItems has only 1 notiId, lost all ids in storage
+         */
+        internal fun trackOpenedLazy(notificationID: String) {
+            Log.d(TAG, "trackOpenedLazy save notiId={$notificationID} to tracking queue pendingTrackingOpenedItems(before): " + pendingTrackingOpenedItems.joinToString(","))
+
+            // Save to queue + localStorage
+            pendingTrackingOpenedItems.add(notificationID)
+            PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
+            // Delay flushing queue
+            // Empty queue on success
+            // NOTE: You must do this in non-blocking mode to ensure program will continue to run without any dependant on this code
+            val delayInMs:Long = (1L..125L).random() * 1000
+            // val delayInMs:Long = 8L * 1000
+            trackOpenedWithRetry(delayInMs)
+        }
+
+        internal fun trackOpenedWithRetry(delayInMs: Long) {
+            val verbose = false
+            if (verbose) Log.d(TAG, "trackOpenedWithRetry: delayInMs: $delayInMs")
+
+            // Delay flushing queue
+            // Empty queue on success
+            // NOTE: You must do this in non-blocking mode to ensure program will continue to run without any dependant on this code
+            // Tested in background: This Timer still run when app is in background, not sure for Xiaomi 3
+            // Tested in closed state then open by push:
+            pendingTrackingOpenedTimerTask?.cancel()   // You need to test the case: Cancel existing task if another task was schedule, to avoid duplication tracking
+            pendingTrackingOpenedTimerTask = object : TimerTask() {
+                override fun run() {
+                    if (verbose) Log.d(TAG, "trackOpenedWithRetry: Process tracking queue after delay ${delayInMs}s | Ids=${pendingTrackingOpenedItems.joinToString(",")}")
+
+                    val playerID: String? = PDYLocalData.getPlayerID()
+                    if (playerID.isNullOrBlank()) {
+                        // retry after 10 seconds
+                        trackOpenedWithRetry(10000)
+                        if (verbose) Log.d(TAG, "trackOpenedWithRetry: playerID empty, trying to retry after ${10}s")
+                    } else {
+                        // NOTE: If api request was failed, we don't intend to fire again, ignore it
+                        if (pendingTrackingOpenedItems.size < 1) {
+                            if (verbose) Log.d(TAG, "trackOpenedWithRetry: Skip because pendingTrackingOpenedItems empty")
+                        } else {
+                            trackOpenedList(playerID, pendingTrackingOpenedItems, { response ->
+                                if (verbose) Log.d(TAG, "trackOpenedWithRetry: {$pendingTrackingOpenedItems} successfully")
+                                // Empty queue on success
+                                pendingTrackingOpenedItems = mutableListOf()
+                                PDYLocalData.setPendingTrackOpenNotiIds(pendingTrackingOpenedItems)
+                                // End
+                                null
+                            }, { code, message ->
+                                if (verbose) Log.e(TAG, "trackOpenedWithRetry: error: ${code}, message:${message}")
+                                null
+                            })
+                        }
+                    }
+                }
+            }
+
+            pendingTrackingOpenedTimer.schedule(pendingTrackingOpenedTimerTask, delayInMs)
+        }
+
+
+        @JvmStatic
+        fun restorePendingTrackingOpenedItems() {
+            var items: List<String>? = PDYLocalData.getPendingTrackOpenNotiIds()
+            if (items != null) {
+                Log.d(TAG, "restorePendingTrackingOpenedItems: Restored items: " + items.joinToString(","))
+                pendingTrackingOpenedItems.addAll(items)
+            } else {
+                Log.d(TAG, "restorePendingTrackingOpenedItems: No pending tracking open")
+            }
+        }
+
 
         internal fun editPlayer(playerID:String, params: HashMap<String, Any>, completion:((response: JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) {
             if (_context != null) {
@@ -490,6 +602,24 @@ open class Pushdy {
                 if (_clientKey != null) {
                     val notification = PDYNotification(_context!!, _clientKey!!, _deviceID)
                     notification.trackOpened(playerID, notificationID, completion, failure)
+                } else {
+                    throw noClientKeyException()
+                }
+            }
+            else {
+                throw noContextWasSetException()
+            }
+        }
+
+        internal fun trackOpenedList(playerID: String, notificationIDs: List<String>, completion:((response: JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) {
+            if (_context != null) {
+                if (_clientKey != null) {
+                    val player = PDYPlayer(_context!!, _clientKey!!, _deviceID)
+                    try {
+                        player.trackOpened(playerID, notificationIDs, completion, failure)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "trackOpenedList: error: " + e.message)
+                    }
                 } else {
                     throw noClientKeyException()
                 }
@@ -725,6 +855,16 @@ open class Pushdy {
             else {
                 throw Exception("[Pushdy] Your custom view must implement PDYPushBannerActionInterface interface")
             }
+        }
+
+        @JvmStatic
+        fun useSDKHandler(enabled: Boolean) {
+            PDYNotificationHandler.useSDKHandler(enabled)
+        }
+
+        @JvmStatic
+        fun handleCustomInAppBannerPressed(notificationId: String) {
+            PDYNotificationHandler.handleCustomInAppBannerPressed(notificationId)
         }
 
     }

@@ -34,30 +34,62 @@ import java.util.Date;
 
 internal class PDYNotificationHandler {
     private constructor()
+
     companion object {
+        /*
+        _useSdkHandler == true: Pushdy will use built-in InAppBanner to handle how inappbanner show and it's interaction
+        _useSdkHandler == false: Pushdy will pass data into another handler, that handler will handle in app banner UI, but interaction still handled by SDK. Eg: Use JS thread to show banner on react-native
+        */
+        private var _useSdkHandler: Boolean  = true
+        private var _customBannerData: Map<String, Any>? = null
+        private var _customBannerActions: (() -> Unit?)? = null
+
+
         fun process(title:String, body:String, image:String, data:Map<String, Any>, jsonData: String) {
             val context = Pushdy.getContext()
             if (context != null) {
                 val visible = PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName())
                 val fromState = if (visible) PDYConstant.AppState.ACTIVE else PDYConstant.AppState.BACKGROUND
-                Pushdy.getDelegate()?.onNotificationReceived(jsonData, fromState)
+
                 if (PDYUtil.isAppVisible(context!!, Pushdy.getApplicationPackageName()) && Pushdy.getBadgeOnForeground()) {
 //                    sendBoardcast(context, title, body, data)
                     showInAppNotification(context, title, body, image, data, jsonData)
                 }
                 else {
+                    Log.d("PDYNotificationHandler", "process(): prepare to notify")
                     notify(context!!, title, body, image, data, jsonData)
                 }
+
+                Log.d("PDYNotificationHandler", "process(): send onNotificationReceived to JS")
+                Pushdy.getDelegate()?.onNotificationReceived(jsonData, fromState)
             }
         }
 
         fun notify(context:Context, title: String, body: String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
-            if (curActivity != null) {
+            // Log.d("PDYNotificationHandler", "notify().curActivity != null : ${curActivity != null}")
+
+
+            var intentClass: Class<*>?
+            if (curActivity == null) {
+                intentClass = PDYUtil.getMainActivityClass(context)
+                if (intentClass == null) {
+                    Log.e("PDYNotificationHandler", "No activity class found for the notification")
+                }
+                // Log.d("PDYNotificationHandler", "notify().intentClass from getMainActivityClass: ${intentClass?.canonicalName}")
+            } else {
+                intentClass = curActivity.javaClass
+                // Log.d("PDYNotificationHandler", "notify().intentClass from curActivity: ${intentClass?.canonicalName}")
+            }
+
+
+            if (intentClass != null) {
+
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 var notification = Pushdy.getDelegate()?.customNotification(title, body, image, data)
                 if (notification == null) {
-                    val intent = Intent(context, curActivity.javaClass)
+                    val intent = Intent(context, intentClass)
+
                     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     intent.putExtra("pushdy_notification", jsonData)
 
@@ -94,6 +126,8 @@ internal class PDYNotificationHandler {
                     notification = notificationBuilder.build()
                 } else {
                 }
+
+                // Log.d("PDYNotificationHandler", "notificationManager.notify notification.title: $title")
                 notificationManager.notify(Date().getTime().toInt(), notification)
             }
         }
@@ -168,16 +202,32 @@ internal class PDYNotificationHandler {
                 notification.put("body", body)
                 notification.put("image", image)
 
+                val onTapNotification = {
+                    Log.d("PDYNotificationHandler", "In App Banner Notification has tapped")
+
+                    // Bring MainActivity (Pushdy is running on) to top
+                    startOriginActivity()
+
+                    Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
+                    null
+                }
+
+
+                // Handle custom in app banner view in react-native thread
+                if (!_useSdkHandler) {
+                    // Store data to execute it later
+                     _customBannerData = notification
+                     _customBannerActions = onTapNotification
+
+                    // Stop execution
+                    return
+                }
+
+
+
                 if (bannerView is PDYPushBannerActionInterface) {
-                    (bannerView as PDYPushBannerActionInterface).show(notification, onTap = {
-                        Log.d("PDYNotificationHandler", "In App Banner Notification has tapped")
-
-                        // Bring MainActivity (Pushdy is running on) to top
-                        startOriginActivity()
-
-                        Pushdy.onNotificationOpened(data[PDYConstant.Keys.NOTIFICATION_ID].toString(), jsonData, PDYConstant.AppState.ACTIVE)
-                        null
-                    })
+                    // show() notification behavior depend on _useCustomInAppBanner
+                    (bannerView as PDYPushBannerActionInterface).show(notification, onTap = onTapNotification)
                 }
 
                 // Add and show banner
@@ -217,5 +267,33 @@ internal class PDYNotificationHandler {
         }
 
 
+        fun useSDKHandler(enabled: Boolean) {
+            _useSdkHandler = enabled
+        }
+
+        fun handleCustomInAppBannerPressed(notificationId: String) {
+            if (_useSdkHandler) {
+                return
+            }
+
+            try {
+                val nId: String = _customBannerData!!["_notification_id"] as String
+                if (notificationId.equals(nId)) {
+                    // trigger actions
+                    _customBannerActions?.invoke()
+
+                    // clean
+                    cleanCustomBannerData(0.1)
+                } else {
+                    print("Id is not identical: " + notificationId + ", " + nId)
+                }
+            } catch (e: Exception) {
+                print(e)
+            }
+        }
+
+        private fun cleanCustomBannerData(delay: Double) {
+            // Should clean only if you sure there's no condition racing
+        }
     }
 }

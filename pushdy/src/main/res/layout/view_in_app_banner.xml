@@ -1,72 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="70dp"
-        android:id="@+id/notificationC"
-        android:background="@drawable/bg_line_bottom_border">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/notificationC"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:background="@drawable/bg_line_bottom_border"
+    android:minHeight="70dp">
+
+    <ImageView
+        android:id="@+id/btnClose"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="2dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_close" />
 
     <LinearLayout
-            android:id="@+id/llBadge"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="12dp"
-            android:layout_toLeftOf="@+id/btnClose"
-            android:orientation="horizontal">
+        android:id="@+id/llBadge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toLeftOf="@+id/btnClose"
+        android:orientation="horizontal">
 
         <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <ImageView
-                    android:id="@+id/ivThumb"
-                    android:layout_marginRight="8dp"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:background="#eeeeee"
-                    android:layout_gravity="center" />
+                android:id="@+id/ivThumb"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="8dp"
+                android:background="#eeeeee"
+                android:maxWidth="60dp"
+                android:maxHeight="60dp"
+                android:minWidth="60dp"
+                android:minHeight="60dp"
+                android:scaleType="centerInside" />
         </FrameLayout>
 
         <LinearLayout
-                android:layout_width="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                style="@style/TextAppearance.Compat.Notification.Title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_marginBottom="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="This is a very long title lorem ipsum title lorem ipsum"
+                android:textColor="#000" />
 
             <TextView
-                    android:id="@+id/tvTitle"
-                    style="@style/TextAppearance.Compat.Notification.Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="4dp"
-                    android:ellipsize="end"
-                    android:textColor="#000"
-                    android:maxLines="1"
-                    android:text="title" />
-
-            <TextView
-                    android:id="@+id/tvContent"
-                    style="@style/TextAppearance.Compat.Notification.Line2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#000"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:text="content" />
+                android:id="@+id/tvContent"
+                style="@style/TextAppearance.Compat.Notification.Line2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:text="content content content content content content content content content content content content content content content content content content content content content "
+                android:textColor="#000" />
 
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
-            android:id="@+id/btnClose"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:src="@drawable/ic_close" />
 </RelativeLayout>
 
