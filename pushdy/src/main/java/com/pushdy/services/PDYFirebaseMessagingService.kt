@@ -57,7 +57,10 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
 
 
             var nmsPayload: String = ""
-            val nmsPayloadOrigin = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
+            var nmsPayloadOrigin = ""
+            if (data.get("_nms_payload") != null) {
+                nmsPayloadOrigin = String(Base64.decode(data.get("_nms_payload")!!.toString(), Base64.NO_WRAP))
+            }
 
             if (image != "") {
                 /**
