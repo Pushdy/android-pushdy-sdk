@@ -26,7 +26,7 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
         val n = message.notification
 
 
-        if (data != null) {
+        if (!data.isNullOrEmpty()) {
             // Remember to fallback into data message, instead of notification message
             val title = n?.title ?: data.get("title").toString()
             val body = n?.body ?: data.get("body").toString()
