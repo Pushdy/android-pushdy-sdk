@@ -94,7 +94,11 @@ open class Pushdy {
                 check = true
             }
             _deviceID = deviceID
+
+            Log.d(TAG, "setDeviceId: _deviceID: $_deviceID")
+
             if (check){
+                // Create player and run Pushdy from now on
                 onSession(true)
             }
         }
@@ -212,10 +216,11 @@ open class Pushdy {
             }
         }
 
+        // Create player and run Pushdy from now on
         @JvmStatic
         fun onSession(force: Boolean){
             val playerID = PDYLocalData.getPlayerID()
-            Log.d(TAG, "PLAYER ID: $playerID")
+            Log.d(TAG, "onSession: PLAYER ID: $playerID")
             if (playerID == null) {
                 createPlayer()
             } else {
@@ -229,8 +234,6 @@ open class Pushdy {
 
         private fun initialize() {
             if (_context != null) {
-                val deviceID = _deviceID
-                Log.d(TAG, "DEVICE ID: $deviceID")
                 PDYLocalData.initWith(_context!!)
 
                 if (_context!! is Application) {
@@ -355,8 +358,11 @@ open class Pushdy {
 
         internal fun createPlayer() {
             if (_deviceID == "unexpecteddeviceid"){
+                Log.d(TAG, "Skip create player because of _deviceID: $_deviceID")
                 return
             }
+
+            Log.d(TAG, "attempt to createPlayer with device ID: $_deviceID")
             var hasTokenBefore = false
             val deviceToken = PDYLocalData.getDeviceToken()
             if (deviceToken != null) {
@@ -382,6 +388,12 @@ open class Pushdy {
                                 editPlayer()
                             }
                         }
+                        else {
+                            Log.d("Pushdy", "create player error: jsonObj does not containing field `id`")
+                        }
+                    }
+                    else {
+                        Log.d("Pushdy", "create player error: jsonObj is not success")
                     }
 
                     var shouldEditPlayer = false
