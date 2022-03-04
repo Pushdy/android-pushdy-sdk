@@ -32,7 +32,9 @@ def fcm_version = safeExtGet("fcm_version", "20.0.0")
 
 android {
     compileSdkVersion 28
-
+    lintOptions {
+        abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 16
