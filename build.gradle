@@ -25,7 +25,7 @@ publishing {
         mavenJava(MavenPublication) {
             groupId = 'com.github.Pushdy'
             artifactId = 'android-pushdy-sdk'
-            version = '0.3.6'
+            version = '1.0.0'
 
             from components.java
         }
