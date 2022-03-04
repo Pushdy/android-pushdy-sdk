@@ -5,6 +5,7 @@ buildscript {
     repositories {
         jcenter()
         google()
+        mavenCentral()
     }
 
     dependencies {
@@ -14,8 +15,8 @@ buildscript {
 }
 
 plugins {
-    id 'maven-publish'
     id 'com.android.library'
+    id 'maven-publish'
 }
 
 apply plugin: 'com.android.library'
@@ -86,14 +87,15 @@ task androidSourcesJar(type: Jar) {
 }
 
 project.afterEvaluate {
-    if (!plugins.hasPlugin("android")) {
+    if (plugins.hasPlugin("android")) {
         publishing {
             publications {
-                mavenAar(MavenPublication) {
+                release(MavenPublication) {
                     groupId = 'com.github.Pushdy'
                     artifactId = 'android-pushdy-sdk'
                     artifact androidSourcesJar
                     version = '1.0.10'
+                    from components.release
                 }
             }
         }
