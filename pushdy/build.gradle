@@ -80,13 +80,19 @@ repositories {
     maven { url 'https://maven.google.com' }
 }
 
+task androidSourcesJar(type: Jar) {
+    classifier 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
 project.afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
                 groupId = 'com.github.Pushdy'
                 artifactId = 'android-pushdy-sdk'
-                version = '1.0.8'
+                artifact androidSourcesJar
+                version = '1.0.10'
             }
         }
     }
