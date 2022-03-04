@@ -19,15 +19,15 @@ buildscript {
 plugins {
     id 'maven-publish'
 }
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = 'com.github.Pushdy'
-            artifactId = 'android-pushdy-sdk'
-            version = '1.0.0'
-
-            from components.java
+afterEvaluate {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = 'com.github.Pushdy'
+                artifactId = 'android-pushdy-sdk'
+                version = '1.0.1'
+                from components.java
+            }
         }
     }
 }
