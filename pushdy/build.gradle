@@ -86,13 +86,15 @@ task androidSourcesJar(type: Jar) {
 }
 
 project.afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                groupId = 'com.github.Pushdy'
-                artifactId = 'android-pushdy-sdk'
-                artifact androidSourcesJar
-                version = '1.0.10'
+    if (!plugins.hasPlugin("android")) {
+        publishing {
+            publications {
+                mavenAar(MavenPublication) {
+                    groupId = 'com.github.Pushdy'
+                    artifactId = 'android-pushdy-sdk'
+                    artifact androidSourcesJar
+                    version = '1.0.10'
+                }
             }
         }
     }
