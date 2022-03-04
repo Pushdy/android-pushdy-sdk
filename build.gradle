@@ -19,6 +19,7 @@ buildscript {
 plugins {
     id 'maven-publish'
     id 'maven'
+    plugin: 'java'
 }
 afterEvaluate {
     publishing {
