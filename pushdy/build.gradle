@@ -5,6 +5,7 @@ buildscript {
     repositories {
         jcenter()
         google()
+        mavenCentral()
     }
 
     dependencies {
@@ -13,14 +14,10 @@ buildscript {
     }
 }
 
-plugins {
-    id 'maven-publish'
-    id 'com.android.library'
-}
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -93,6 +90,7 @@ project.afterEvaluate {
                 artifactId = 'android-pushdy-sdk'
                 artifact androidSourcesJar
                 version = '1.0.10'
+                from components.release
             }
         }
     }
