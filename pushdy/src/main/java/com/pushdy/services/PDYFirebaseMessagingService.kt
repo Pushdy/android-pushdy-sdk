@@ -28,10 +28,14 @@ open class PDYFirebaseMessagingService : FirebaseMessagingService() {
 
         if (!data.isNullOrEmpty()) {
             // Remember to fallback into data message, instead of notification message
-            val title = n?.title ?: data.get("title").toString()
-            val body = n?.body ?: data.get("body").toString()
+            var title = n?.title ?: if (data.get("title") != null) data.get("title").toString() else ""
+            var body = n?.body ?: if (data.get("body") != null) data.get("title").toString() else ""
             var image = n?.imageUrl?.toString() ?: ""
 
+            if (title.isNullOrEmpty() && body.isNullOrEmpty()) {
+                Log.d(TAG, "prevent show empty push notification.")
+                return
+            }
             // Fall back to custom media_key
             if (image == "" || image == "null") {
                 Log.d(TAG, PDYNotificationView.getCustomMediaKey())
