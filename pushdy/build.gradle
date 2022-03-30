@@ -14,14 +14,10 @@ buildscript {
     }
 }
 
-plugins {
-    id 'com.android.library'
-    id 'maven-publish'
-}
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -87,16 +83,14 @@ task androidSourcesJar(type: Jar) {
 }
 
 project.afterEvaluate {
-    if (plugins.hasPlugin("android")) {
-        publishing {
-            publications {
-                release(MavenPublication) {
-                    groupId = 'com.github.Pushdy'
-                    artifactId = 'android-pushdy-sdk'
-                    artifact androidSourcesJar
-                    version = '1.0.10'
-                    from components.release
-                }
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = 'com.github.Pushdy'
+                artifactId = 'android-pushdy-sdk'
+                artifact androidSourcesJar
+                version = '1.0.10'
+                from components.release
             }
         }
     }
