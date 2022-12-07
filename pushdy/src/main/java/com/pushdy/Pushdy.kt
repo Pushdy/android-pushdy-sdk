@@ -9,7 +9,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -246,12 +246,10 @@ open class Pushdy {
         }
 
         private fun initializeFirebaseInstanceID() {
-            FirebaseInstanceId.getInstance().instanceId
-                .addOnCompleteListener(OnCompleteListener { task ->
+            FirebaseInstallations.getInstance().getToken(false).addOnCompleteListener { task ->
                     if (!task.isSuccessful) {
                         val exception:Exception = task.exception ?: Exception("[Pushdy] Failed to register remote notification")
                         getDelegate()?.onRemoteNotificationFailedToRegister(exception)
-                        return@OnCompleteListener
                     }
 
                     // Get new Instance ID token
@@ -271,7 +269,7 @@ open class Pushdy {
                             }
                         }
                     }
-                })
+                }
         }
 
         private fun observeAttributesChanged() {
