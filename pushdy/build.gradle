@@ -88,7 +88,7 @@ project.afterEvaluate {
                 groupId = 'com.github.Pushdy'
                 artifactId = 'android-pushdy-sdk'
                 artifact androidSourcesJar
-                version = '1.0.13'
+                version = '1.0.14'
                 from components.release
             }
         }
