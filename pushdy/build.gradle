@@ -24,7 +24,6 @@ def safeExtGet(prop, fallback) {
 }
 
 def gcm_version = safeExtGet("gcm_version", "12.0.1")
-def fcm_version = safeExtGet("fcm_version", "20.0.0")
 
 
 android {
@@ -63,9 +62,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.android.volley:volley:1.1.1'
-    implementation 'com.google.firebase:firebase-installations:17.1.0'
     compileOnly "com.google.android.gms:play-services-gcm:$gcm_version"
-    api "com.google.firebase:firebase-messaging:$fcm_version"
+    api "com.google.firebase:firebase-messaging:23.1.0"
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 repositories {

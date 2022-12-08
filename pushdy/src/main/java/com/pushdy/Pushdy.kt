@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.View
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -196,7 +195,7 @@ open class Pushdy {
         fun registerForRemoteNotification() {
             if (_context != null) {
                 FirebaseMessaging.getInstance().isAutoInitEnabled = true
-                initializeFirebaseInstanceID()
+                getFirebaseMessagingToken()
             }
             else {
                 throw noContextWasSetException()
@@ -245,31 +244,31 @@ open class Pushdy {
             }
         }
 
-        private fun initializeFirebaseInstanceID() {
-            FirebaseInstallations.getInstance().getToken(false).addOnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        val exception:Exception = task.exception ?: Exception("[Pushdy] Failed to register remote notification")
-                        getDelegate()?.onRemoteNotificationFailedToRegister(exception)
-                    }
+        private fun getFirebaseMessagingToken() {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    val exception:Exception = task.exception ?: Exception("[Pushdy] Failed to register remote notification")
+                    getDelegate()?.onRemoteNotificationFailedToRegister(exception)
+                    return@OnCompleteListener
+                }
 
-                    // Get new Instance ID token
-                    val token = task.result?.token
-                    if (token != null) {
-                        Log.d(TAG, "initializeFirebaseInstanceID token: ${token!!}")
-                        val lastToken = PDYLocalData.getDeviceToken()
-                        PDYLocalData.setDeviceToken(token!!)
-                        getDelegate()?.onRemoteNotificationRegistered(token!!)
-                        val playerID = PDYLocalData.getPlayerID()
-                        if (playerID == null) {
-                            createPlayer()
-                        }
-                        else {
-                            if (lastToken != token){
-                                editPlayer()
-                            }
+                val token = task.result;
+                if (token != null) {
+                    Log.d(TAG, "getFirebaseMessagingToken token: ${token!!}")
+                    val lastToken = PDYLocalData.getDeviceToken()
+                    PDYLocalData.setDeviceToken(token!!)
+                    getDelegate()?.onRemoteNotificationRegistered(token!!)
+                    val playerID = PDYLocalData.getPlayerID()
+                    if (playerID == null) {
+                        createPlayer()
+                    }
+                    else {
+                        if (lastToken != token){
+                            editPlayer()
                         }
                     }
                 }
+            })
         }
 
         private fun observeAttributesChanged() {
