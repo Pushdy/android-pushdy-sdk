@@ -18,6 +18,8 @@ open class PDYLocalData {
         val ATTRIBUTES_SCHEMA = "PUSHDY_ATTRIBUTES_SCHEMA"
         val PREV_ATTRIBUTES_SCHEMA = "PUSHDY_PREV_ATTRIBUTES_SCHEMA"
         val PENDING_TRACKING_OPEN_IDS = "PENDING_TRACKING_OPEN_IDS"
+        val PENDING_TRACKING_EVENTS = "PENDING_TRACKING_EVENTS"
+        val APPLICATION_ID = "PUSHDY_APPLICATION_ID"
 
         var _context:Context? = null
 
@@ -470,6 +472,80 @@ open class PDYLocalData {
             }
         }
 
+        @JvmStatic
+        fun setPendingTrackEvents(pendingEvents: MutableList<HashMap<String, Any>>) {
+            if (_context != null) {
+                PDYStorage.setString(_context!!, PENDING_TRACKING_EVENTS, Gson().toJson(pendingEvents))
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+        @JvmStatic
+        fun getPendingTrackEvents(count: Int): MutableList<HashMap<String, Any>> {
+            if (_context != null) {
+                val a = PDYStorage.getString(_context!!, PENDING_TRACKING_EVENTS)
+                var str: String
+                if (a != null) {
+                    str = a.toString()
+                    val events = Gson().fromJson(str, ArrayList::class.java)
+                    if (events != null) {
+                        val result = events.toMutableList()
+                        if (result.size > count) {
+                            return (result.subList(0, count) ?: ArrayList() ) as MutableList<HashMap<String, Any>>
+                        }
+                        else {
+                            return  (result ?: ArrayList()) as MutableList<HashMap<String, Any>>
+                        }
+                    }
+                }
+            } else {
+                throw noContextWasSetException()
+            }
+            return ArrayList()
+        }
+
+        @JvmStatic
+        fun removePendingTrackEvents(count: Number) {
+            if (_context != null) {
+                val a = PDYStorage.getString(_context!!, PENDING_TRACKING_EVENTS)
+                var str: String
+                if (a != null) {
+                    str = a.toString()
+                    val events = Gson().fromJson(str, ArrayList::class.java)
+                    if (events != null) {
+                        val result = events.toMutableList()
+                        if (result.size > count.toInt()) {
+                            result.subList(0, count.toInt()).clear()
+                            PDYStorage.setString(_context!!, PENDING_TRACKING_EVENTS, Gson().toJson(result))
+                        }
+                        else {
+                            PDYStorage.setString(_context!!, PENDING_TRACKING_EVENTS, "")
+                        }
+                    }
+                }
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+        @JvmStatic
+        fun setApplicationId(appId: String) {
+            if (_context != null) {
+                PDYStorage.setString(_context!!, APPLICATION_ID, appId)
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+        @JvmStatic
+        fun getApplicationId(): String? {
+            if (_context != null) {
+                return PDYStorage.getString(_context!!, APPLICATION_ID)
+            } else {
+                throw noContextWasSetException()
+            }
+        }
 
         fun getValue(name:String) : Any? {
             if (_context != null) {
@@ -537,8 +613,6 @@ open class PDYLocalData {
                 }
             }
         }
-
-
 
     }
 

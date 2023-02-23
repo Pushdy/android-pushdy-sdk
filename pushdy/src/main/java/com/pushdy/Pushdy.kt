@@ -12,10 +12,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import com.pushdy.core.entities.PDYAttribute
-import com.pushdy.core.entities.PDYNotification
-import com.pushdy.core.entities.PDYParam
-import com.pushdy.core.entities.PDYPlayer
+import com.pushdy.core.entities.*
 import com.pushdy.core.ultilities.PDYDeviceInfo
 import com.pushdy.handlers.PDYLifeCycleHandler
 import com.pushdy.handlers.PDYNotificationHandler
@@ -334,6 +331,54 @@ open class Pushdy {
         @JvmStatic
         fun getDeviceToken() : String? {
             return PDYLocalData.getDeviceToken()
+        }
+
+        @JvmStatic
+        fun getPendingEvents(count: Int): MutableList<java.util.HashMap<String, Any>>? {
+            return PDYLocalData.getPendingTrackEvents(count)
+        }
+
+        @JvmStatic
+        fun setPendingEvents(list: MutableList<HashMap<String, Any>>) {
+            PDYLocalData.setPendingTrackEvents(list)
+        }
+
+        @JvmStatic
+        fun removePendingEvents(count: Int) {
+            PDYLocalData.removePendingTrackEvents(count)
+        }
+
+        @JvmStatic
+        fun setApplicationId(applicationId: String) {
+            PDYLocalData.setApplicationId(applicationId)
+        }
+
+        @JvmStatic
+        fun trackEvent(eventName: String, params: HashMap<String, Any>, immediate: Boolean = false, completion: ((response: JsonElement?) -> Unit)? = null, failure: ((code:Int, message:String?) -> Unit)? = null) {
+            val playerID = this.getPlayerID();
+            if (playerID != null) {
+                val event = PDYEvent(this._context!!, this._clientKey!!, playerID!!);
+
+                event.trackEvent(eventName, params, immediate, { response: JsonElement? ->
+                    completion?.invoke(response)
+                }, { code:Int, message:String? ->
+                    failure?.invoke(code, message)
+                })
+            }
+        }
+
+        @JvmStatic
+        fun pushPendingEvents(completion: ((response: JsonElement?) -> Unit)? = null, failure: ((code:Int, message:String?) -> Unit)? = null) {
+            val playerID = this.getPlayerID();
+            if (playerID != null) {
+                val event = PDYEvent(this._context!!, this._clientKey!!, playerID!!);
+
+                event.pushPendingEvents( { response: JsonElement? ->
+                    completion?.invoke(response)
+                }, { code:Int, message:String? ->
+                    failure?.invoke(code, message)
+                })
+            }
         }
 
         /**
