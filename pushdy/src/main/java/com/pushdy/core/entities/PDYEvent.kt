@@ -38,7 +38,7 @@ open class PDYEvent(val ctx: Context, clientKey : String, playerID: String) : PD
             event["properties"] = params
             event["created_at"] = System.currentTimeMillis() /1000
             event["player_id"] = this.playerID
-            val pendingEvents = PDYLocalData.getPendingTrackEvents(999 )
+            val pendingEvents = PDYLocalData.getPendingTrackEvents(999)
             pendingEvents.add(event);
             if (immediate) {
                 pushPendingEvents(completion, failure)
