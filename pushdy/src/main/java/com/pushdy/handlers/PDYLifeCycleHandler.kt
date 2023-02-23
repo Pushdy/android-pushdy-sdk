@@ -99,6 +99,8 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
     override fun onActivityPaused(activity: Activity?) {
         Log.d("PDYLifeCycleHandler", "onActivityPaused: "+activity?.localClassName)
         Pushdy.getActivityLifeCycleDelegate()?.onActivityPaused(activity)
+        // Process pending events when the app goes to background
+        Pushdy.pushPendingEvents()
     }
 
     override fun onActivityResumed(activity: Activity?) {
@@ -130,6 +132,9 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
                 Log.d("PDYLifeCycleHandler", "onActivityResumed: no notification in intent")
             }
         }
+
+        // Process pending events when the app goes to foreground
+        Pushdy.pushPendingEvents()
     }
 
     override fun onActivityStopped(activity: Activity?) {

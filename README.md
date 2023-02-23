@@ -199,6 +199,104 @@ Pushdy.pushAttribute("name", value);
 Pushdy.pushAttribute("name", value, false);
 ```
 
+- setApplicationId
+
+Your applicationId is a unique identifier for your application in Pushdy. Use for trackEvent method.
+
+```kotlin
+Pushdy.setApplicationId("your_application_id")
+```
+
+```Java
+Pushdy.setApplicationId("your_application_id");
+```
+
+- setPendingEvents
+
+Set pending events to Pushdy Server.
+
+```kotlin
+// Kotlin language
+val events = ArrayList<HashMap<String, Any>>()
+val event = HashMap<String, Any>()
+event.put("name", "purchase")
+event.put("amount", 1000)
+events.add(event)
+Pushdy.setPendingEvents(events)
+```
+
+```Java
+// Java language
+ArrayList<HashMap<String, Object>> events = new ArrayList<HashMap<String, Object>>();
+HashMap<String, Object> event = new HashMap<String, Object>();
+event.put("name", "purchase");
+event.put("amount", 1000);
+events.add(event);
+Pushdy.setPendingEvents(events);
+```
+
+- getPendingEvents
+
+Get pending events from PushdySDK.
+
+```kotlin
+// Kotlin language
+Pushdy.getPendingEvents(50)
+```
+
+```Java
+// Java language
+Pushdy.getPendingEvents(50);
+```
+
+- removePendingEvents
+
+Remove pending events from PushdySDK.
+
+```kotlin
+// Kotlin language
+Pushdy.removePendingEvents(50)
+```
+
+```Java
+// Java language
+Pushdy.removePendingEvents(50);
+```
+
+- trackEvent
+
+Track event to PushdySDK. You can set third param (commitImmediately variable) to true to track your event immediately to Pushdy Server.
+
+```kotlin
+// Kotlin language
+HashMap<String, Any> params = HashMap<String, Any>();
+params.put("amount", 1000);
+
+Pushdy.trackEvent("purchase", params, true);
+```
+
+```Java
+
+// Equivalent to
+HashMap<String, Object> params = new HashMap<String, Object>();
+Pushdy.trackEvent("purchase", params, true);
+```
+
+- pushPendingEvents
+
+Push all pending events to Pushdy Server, up to 50 events per patch.
+
+```kotlin
+// Kotlin language
+// Equivalent to
+Pushdy.pushPendingEvents()
+```
+
+```Java
+// Java language
+Pushdy.pushPendingEvents()
+```
+
 **Pushdy Delegation**
 
 For listen the Pushdy callback and adapt your logic with Pushdy, you must implement PushdyDelegate in your App Delegate
