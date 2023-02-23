@@ -62,10 +62,11 @@ open class PDYEvent(val ctx: Context, clientKey : String, playerID: String) : PD
      */
     open fun pushPendingEvents(completion:((response:JsonElement?) -> Unit?)?, failure:((code:Int, message:String?) -> Unit?)?) : PDYRequestSingleton? {
         if (DEBUG) Log.d(TAG, "pushPendingEvents requested")
-        PDYLocalData.initWith(this.context!!)
-        val applicationId = PDYLocalData.getApplicationId()
-        val events = PDYLocalData.getPendingTrackEvents(50)
         if (this.context != null) {
+            PDYLocalData.initWith(this.context!!)
+            val applicationId = PDYLocalData.getApplicationId()
+            val events = PDYLocalData.getPendingTrackEvents(50)
+
             if (events.size == 0) {
                 if (DEBUG) Log.d(TAG, "pushPendingEvents --> no pending events")
                 return null
