@@ -40,11 +40,10 @@ open class PDYEvent(val ctx: Context, clientKey : String, playerID: String) : PD
             event["player_id"] = this.playerID
             val pendingEvents = PDYLocalData.getPendingTrackEvents(999)
             pendingEvents.add(event);
+            PDYLocalData.initWith(this.context!!)
+            PDYLocalData.setPendingTrackEvents(pendingEvents)
             if (immediate) {
                 pushPendingEvents(completion, failure)
-            } else {
-                PDYLocalData.initWith(this.context!!)
-                PDYLocalData.setPendingTrackEvents(pendingEvents)
             }
         } else {
             if (DEBUG) Log.d(TAG, "trackEvent: no context was set");
