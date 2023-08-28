@@ -96,7 +96,7 @@ internal class PDYNotificationHandler {
                     val defaultChannel =
                         Pushdy.getNotificationChannel() ?: "default_notification_channel"
                     val pendingIntent =
-                        PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+                        PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
                     val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                     val notificationBuilder = NotificationCompat.Builder(context, defaultChannel)
                     val smallIcon = Pushdy.getSmallIcon()
