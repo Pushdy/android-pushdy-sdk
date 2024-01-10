@@ -20,6 +20,8 @@ open class PDYLocalData {
         val PENDING_TRACKING_OPEN_IDS = "PENDING_TRACKING_OPEN_IDS"
         val PENDING_TRACKING_EVENTS = "PENDING_TRACKING_EVENTS"
         val APPLICATION_ID = "PUSHDY_APPLICATION_ID"
+        val BANNERS = "PUSHDY_BANNERS"
+        val BANNER_OBJECT = "PUSHDY_BANNER_OBJECT_"
 
         var _context:Context? = null
 
@@ -524,6 +526,54 @@ open class PDYLocalData {
                         }
                     }
                 }
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+
+        @JvmStatic
+        fun setBanners(banners: JsonArray) {
+            if (_context != null) {
+                PDYStorage.setString(_context!!, BANNERS, banners.toString())
+            } else {
+                throw noContextWasSetException()
+            }
+        }
+
+        @JvmStatic
+        fun getBanners(): JsonArray? {
+            if (_context != null) {
+                val a = PDYStorage.getString(_context!!, BANNERS)
+                var str: String
+                if (a != null) {
+                    str = a.toString()
+                    return Gson().fromJson(str, JsonArray::class.java)
+                }
+            } else {
+                throw noContextWasSetException()
+            }
+            return null
+        }
+
+        @JvmStatic
+        fun getBannerObject(id: String): JsonObject? {
+            if (_context != null) {
+                val bannerObject = PDYStorage.getString(_context!!, BANNER_OBJECT + id)
+
+                if (bannerObject != null) {
+                    return Gson().fromJson(bannerObject, JsonObject::class.java)
+                }
+            } else {
+                throw noContextWasSetException()
+            }
+            return null
+        }
+
+        @JvmStatic
+        fun setBannerObject(id: String, bannerObject: JsonObject) {
+            if (_context != null) {
+                PDYStorage.setString(_context!!, BANNER_OBJECT + id, bannerObject.toString())
             } else {
                 throw noContextWasSetException()
             }

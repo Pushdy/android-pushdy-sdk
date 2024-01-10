@@ -10,6 +10,7 @@ import android.view.View
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.pushdy.core.entities.*
@@ -225,7 +226,9 @@ open class Pushdy {
                 } else if (!updatePlayerIfNeeded()){
                     createNewSession()
                 }
+                _subscribe()
             }
+
         }
 
         private fun initialize() {
@@ -349,6 +352,123 @@ open class Pushdy {
         }
 
         @JvmStatic
+        fun subscribe() {
+            return _subscribe()
+        }
+
+        @JvmStatic
+        fun getAllBanners(): JsonArray? {
+            return PDYLocalData.getBanners()
+        }
+
+        @JvmStatic
+        fun trackBanner(bannerId: String, type: String) {
+            var playerID = PDYLocalData.getPlayerID()
+            var applicationId = PDYLocalData.getApplicationId() ?: "pushdy";
+
+            // FIXME: remove this line; for testing only
+//            applicationId = "pushdy";
+//            playerID = "96655d2e-ce02-3ec7-a0f6-273e5458fe67"
+
+
+            if (playerID != null) {
+                val player = PDYPlayer(_context!!, _clientKey!!, playerID)
+
+                // update banner tracking object
+                val bannerTrackingData = PDYLocalData.getBannerObject(bannerId) ?: JsonObject()
+
+                // {"close": 1, "click": 1, "imp": 1, "loaded": 1, "last_close_ts": 1234567890, "last_click_ts": 1234567890, "last_imp_ts": 1234567890, "last_loaded_ts": 1234567890}
+
+                when (type) {
+                    "impression" -> {
+                        // increase impression count
+                        val impressionCount = bannerTrackingData.get("imp")?.asInt ?: 0
+                        bannerTrackingData.addProperty("imp", impressionCount + 1)
+                        // update last_impression_ts
+                        bannerTrackingData.addProperty(
+                            "last_imp_ts",
+                            System.currentTimeMillis() / 1000
+                        )
+                    }
+                    "click" -> {
+                        // increase click count
+                        val clickCount = bannerTrackingData.get("click")?.asInt ?: 0
+                        bannerTrackingData.addProperty("click", clickCount + 1)
+                        // update last_click_ts
+                        bannerTrackingData.addProperty("last_click_ts", System.currentTimeMillis() / 1000)
+                    }
+                    "close" -> {
+                        // increase close count
+                        val closeCount = bannerTrackingData.get("close")?.asInt ?: 0
+                        bannerTrackingData.addProperty("close", closeCount + 1)
+                        // update last_close_ts
+                        bannerTrackingData.addProperty("last_close_ts", System.currentTimeMillis() / 1000)
+                    }
+                    "loaded" -> {
+                        // increase loaded count
+                        val loadedCount = bannerTrackingData.get("loaded")?.asInt ?: 0
+                        bannerTrackingData.addProperty("loaded", loadedCount + 1)
+                        // update last_loaded_ts
+                        bannerTrackingData.addProperty("last_loaded_ts", System.currentTimeMillis() / 1000)
+                    }
+                }
+
+                // update banner tracking object
+                PDYLocalData.setBannerObject(bannerId, bannerTrackingData)
+
+                Log.d(TAG, "trackBanner bannerTrackingData: ${bannerTrackingData}")
+                var data = JsonObject()
+                // convert to {
+                //    "imp": {
+                //        "b": {
+                //            "a506b0ce-1b8b-440f-b415-1acc3ade855d": 3
+                //        }
+                //    }
+                //}
+
+                // imp
+                data.add("imp", JsonObject())
+                data.get("imp")?.asJsonObject?.add("b", JsonObject())
+                data.get("imp")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("imp")?.asInt ?: 0)
+
+                // close
+                data.add("close", JsonObject())
+                data.get("close")?.asJsonObject?.add("b", JsonObject())
+                data.get("close")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("close")?.asInt ?: 0)
+
+                // click
+                data.add("click", JsonObject())
+                data.get("click")?.asJsonObject?.add("b", JsonObject())
+                data.get("click")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("click")?.asInt ?: 0)
+
+                // loaded
+                data.add("loaded", JsonObject())
+                data.get("loaded")?.asJsonObject?.add("b", JsonObject())
+                data.get("loaded")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("loaded")?.asInt ?: 0)
+
+
+                Log.d(TAG, "trackBanner data: ${data}")
+
+                player.trackBanner(applicationId,playerID, data, { response ->
+                    Log.d(TAG, "trackBanner successfully ${response}")
+                    null
+                }, { code, message ->
+                    Log.d(TAG, "trackBanner error: ${code}, message:${message}")
+                    null
+                })
+            }
+        }
+
+        @JvmStatic
+        fun getBannerData(bannerId: String): JsonObject? {
+            return PDYLocalData.getBannerObject(bannerId) ?: JsonObject()
+        }
+
+        private fun add(bannerId: String, i: Int) {
+
+        }
+
+        @JvmStatic
         fun setApplicationId(applicationId: String) {
             PDYLocalData.setApplicationId(applicationId)
         }
@@ -392,7 +512,35 @@ open class Pushdy {
                     Log.d(TAG, "createNewSession successfully")
                     null
                 }, { code, message ->
-                    Log.d(TAG, "createNewSession error: ${code}, messag:${message}")
+                    Log.d(TAG, "createNewSession error: ${code}, message:${message}")
+                    null
+                })
+            }
+        }
+
+        internal fun _subscribe() {
+
+            var playerID = PDYLocalData.getPlayerID()
+            Log.d(TAG, "subscribe: PLAYER ID: $playerID")
+            var applicationId = PDYLocalData.getApplicationId() ?: "pushdy";
+
+            // FIXME: remove this line; for testing only
+//            applicationId = "pushdy";
+//            playerID = "96655d2e-ce02-3ec7-a0f6-273e5458fe67"
+
+
+            if (playerID != null) {
+                val player = PDYPlayer(_context!!, _clientKey!!, playerID)
+                player.subscribe(applicationId, playerID, { response ->
+                    Log.d(TAG, "subscribe successfully ${response}")
+                    val banners = response?.asJsonObject?.get("banners")?.asJsonArray;
+                    if (banners != null) {
+                        Log.d(TAG, "subscribe banners: ${banners}")
+                        PDYLocalData.setBanners(banners)
+                    }
+                    null
+                }, { code, message ->
+                    Log.d(TAG, "subscribe error: ${code}, message:${message}")
                     null
                 })
             }
@@ -819,6 +967,8 @@ open class Pushdy {
                     PDYLocalData.setPrevAttributeValue(name, currentValue)
                 }
                 PDYLocalData.setAttributeValue(name, value)
+                // log name and value.
+                Log.d(TAG, "setAttribute: name: $name, value: $value")
                 PDYLocalData.pushToChangedStack(name, value)
 
                 if (commitImmediately) {

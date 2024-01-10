@@ -14,9 +14,9 @@ open class PDYAttribute(val ctx: Context, clientKey : String, deviceID:String?) 
             val request = PDYRequestSingleton.getInstance(context!!)
             request.get(this.url(), this.defaultHeaders(), null, { response:JsonElement? ->
                 completion?.invoke(response)
-            }, { code:Int, message:String? ->
+            }) { code: Int, message: String? ->
                 failure?.invoke(code, message)
-            })
+            }
             return request
         }
         else {
