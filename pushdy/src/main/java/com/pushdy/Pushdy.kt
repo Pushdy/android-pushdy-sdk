@@ -376,6 +376,12 @@ open class Pushdy {
 
                 // update banner tracking object
                 val bannerTrackingData = PDYLocalData.getBannerObject(bannerId) ?: JsonObject()
+                // due to server add the amount of each type of event by add the amount of this data.
+                // So we need a variable to store the amount of each type of event.
+                // Then reset the amount of each type of event to 0 when send to server.
+                val bannerTrackingDataReset = PDYLocalData.getBannerObject("track_$bannerId") ?: JsonObject()
+
+
 
                 // {"close": 1, "click": 1, "imp": 1, "loaded": 1, "last_close_ts": 1234567890, "last_click_ts": 1234567890, "last_imp_ts": 1234567890, "last_loaded_ts": 1234567890}
 
@@ -389,6 +395,12 @@ open class Pushdy {
                             "last_imp_ts",
                             System.currentTimeMillis() / 1000
                         )
+
+                        bannerTrackingDataReset.addProperty("imp", impressionCount + 1)
+                        bannerTrackingDataReset.addProperty(
+                            "last_imp_ts",
+                            System.currentTimeMillis() / 1000
+                        )
                     }
                     "click" -> {
                         // increase click count
@@ -396,6 +408,12 @@ open class Pushdy {
                         bannerTrackingData.addProperty("click", clickCount + 1)
                         // update last_click_ts
                         bannerTrackingData.addProperty("last_click_ts", System.currentTimeMillis() / 1000)
+
+                        bannerTrackingDataReset.addProperty("click", clickCount + 1)
+                        bannerTrackingDataReset.addProperty(
+                            "last_click_ts",
+                            System.currentTimeMillis() / 1000
+                        )
                     }
                     "close" -> {
                         // increase close count
@@ -403,6 +421,12 @@ open class Pushdy {
                         bannerTrackingData.addProperty("close", closeCount + 1)
                         // update last_close_ts
                         bannerTrackingData.addProperty("last_close_ts", System.currentTimeMillis() / 1000)
+
+                        bannerTrackingDataReset.addProperty("close", closeCount + 1)
+                        bannerTrackingDataReset.addProperty(
+                            "last_close_ts",
+                            System.currentTimeMillis() / 1000
+                        )
                     }
                     "loaded" -> {
                         // increase loaded count
@@ -410,11 +434,18 @@ open class Pushdy {
                         bannerTrackingData.addProperty("loaded", loadedCount + 1)
                         // update last_loaded_ts
                         bannerTrackingData.addProperty("last_loaded_ts", System.currentTimeMillis() / 1000)
+
+                        bannerTrackingDataReset.addProperty("loaded", loadedCount + 1)
+                        bannerTrackingDataReset.addProperty(
+                            "last_loaded_ts",
+                            System.currentTimeMillis() / 1000
+                        )
                     }
                 }
 
                 // update banner tracking object
                 PDYLocalData.setBannerObject(bannerId, bannerTrackingData)
+                PDYLocalData.setBannerObject("track_$bannerId", bannerTrackingDataReset)
 
                 Log.d(TAG, "trackBanner bannerTrackingData: ${bannerTrackingData}")
                 var data = JsonObject()
@@ -429,28 +460,30 @@ open class Pushdy {
                 // imp
                 data.add("imp", JsonObject())
                 data.get("imp")?.asJsonObject?.add("b", JsonObject())
-                data.get("imp")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("imp")?.asInt ?: 0)
+                data.get("imp")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingDataReset.get("imp")?.asInt ?: 0)
 
                 // close
                 data.add("close", JsonObject())
                 data.get("close")?.asJsonObject?.add("b", JsonObject())
-                data.get("close")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("close")?.asInt ?: 0)
+                data.get("close")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingDataReset.get("close")?.asInt ?: 0)
 
                 // click
                 data.add("click", JsonObject())
                 data.get("click")?.asJsonObject?.add("b", JsonObject())
-                data.get("click")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("click")?.asInt ?: 0)
+                data.get("click")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingDataReset.get("click")?.asInt ?: 0)
 
                 // loaded
                 data.add("loaded", JsonObject())
                 data.get("loaded")?.asJsonObject?.add("b", JsonObject())
-                data.get("loaded")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingData.get("loaded")?.asInt ?: 0)
+                data.get("loaded")?.asJsonObject?.get("b")?.asJsonObject?.addProperty(bannerId, bannerTrackingDataReset.get("loaded")?.asInt ?: 0)
 
 
                 Log.d(TAG, "trackBanner data: ${data}")
 
                 player.trackBanner(applicationId,playerID, data, { response ->
                     Log.d(TAG, "trackBanner successfully ${response}")
+                    // clear banner tracking object reset
+                    PDYLocalData.setBannerObject("track_$bannerId", JsonObject())
                     null
                 }, { code, message ->
                     Log.d(TAG, "trackBanner error: ${code}, message:${message}")
