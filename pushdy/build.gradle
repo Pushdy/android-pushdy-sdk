@@ -61,7 +61,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.android.volley:volley:1.1.1'
+    implementation 'com.android.volley:volley:1.2.1'
     compileOnly "com.google.android.gms:play-services-gcm:$gcm_version"
     api "com.google.firebase:firebase-messaging:23.1.0"
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
