@@ -179,6 +179,16 @@ open class Pushdy {
         }
 
         @JvmStatic
+        fun setInitialNotification(notification: String) {
+            _initialNotification = notification
+        }
+
+        @JvmStatic
+        fun removeInitialNotification() {
+            _initialNotification = null
+        }
+
+        @JvmStatic
         fun getDelegate() : PushdyDelegate? {
             return _delegate
         }
