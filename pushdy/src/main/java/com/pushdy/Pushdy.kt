@@ -113,12 +113,17 @@ open class Pushdy {
         }
 
         @JvmStatic
+        fun initWith(context: Context) {
+            _context = context
+            initialize()
+        }
+
+        @JvmStatic
         fun initWith(context:Context, clientKey:String, delegate: PushdyDelegate?) {
             _clientKey = clientKey
             _delegate = delegate
             _context = context
 
-            initialize()
             observeAttributesChanged()
             restoreDataFromStorage()
         }
@@ -130,7 +135,6 @@ open class Pushdy {
             _context = context
             _smallIcon = smallIcon
 
-            initialize()
             observeAttributesChanged()
             restoreDataFromStorage()
         }
