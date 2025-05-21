@@ -71,6 +71,7 @@ open class Pushdy {
         private var _pendingNotifications:MutableList<String> = mutableListOf()
         private var _customPushBannerView:View? = null
         private var _activityLifeCycleDelegate:PushdyActivityLifeCycleDelegate? = null
+        private var _initialNotification:String? = null
         private const val UPDATE_ATTRIBUTES_INTERVAL:Long = 5000
         private val TAG = "Pushdy"
 
@@ -155,7 +156,13 @@ open class Pushdy {
             _last_notification_id = notificationID
 
             try {
-                getDelegate()?.onNotificationOpened(notification, fromState)
+                // check if delegate is null
+                if (getDelegate() == null) {
+                    Log.d(TAG, "onNotificationOpened: Delegate is null")
+                    _initialNotification = notification
+                } else {
+                    getDelegate()?.onNotificationOpened(notification, fromState)
+                }
             } catch (e: Exception) {
 
             }
@@ -164,6 +171,11 @@ open class Pushdy {
              * Issue: No player ID when JS was not ready, happen at the first time open app, right after app installed.
              */
             trackOpenedLazy(notificationID)
+        }
+
+        @JvmStatic
+        getInitialNotification(): String? {
+            return _initialNotification
         }
 
         @JvmStatic
