@@ -174,7 +174,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        getInitialNotification(): String? {
+        fun getInitialNotification(): String? {
             return _initialNotification
         }
 
