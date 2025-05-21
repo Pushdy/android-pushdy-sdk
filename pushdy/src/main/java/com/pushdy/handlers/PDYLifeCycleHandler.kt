@@ -55,7 +55,7 @@ open class PDYLifeCycleHandler : Application.ActivityLifecycleCallbacks, Compone
         }
 
         if (curActivity == null){
-            Pushdy.onSession(true)
+            // Pushdy.onSession(true)
             isInBackground = false
         }
         curActivity = activity
