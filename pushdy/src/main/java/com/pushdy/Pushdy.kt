@@ -527,7 +527,7 @@ open class Pushdy {
         @JvmStatic
         fun pushPendingEvents(completion: ((response: JsonElement?) -> Unit)? = null, failure: ((code:Int, message:String?) -> Unit)? = null) {
             val playerID = this.getPlayerID();
-            if (playerID != null && this.clientKey != null) {
+            if (playerID != null && this._clientKey != null) {
                 val event = PDYEvent(this._context!!, this._clientKey!!, playerID!!);
 
                 event.pushPendingEvents( { response: JsonElement? ->
