@@ -100,7 +100,7 @@ internal class PDYNotificationHandler {
                     val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                     val notificationBuilder = NotificationCompat.Builder(context, defaultChannel)
                     val smallIcon = Pushdy.getSmallIcon()
-                    notificationBuilder.setSmallIcon(smallIcon!!)
+                    notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info)
                     notificationBuilder.setContentTitle(title)
                     notificationBuilder.setContentText(body)
                     notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
