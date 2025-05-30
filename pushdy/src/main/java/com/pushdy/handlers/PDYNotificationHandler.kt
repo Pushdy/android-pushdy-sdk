@@ -101,7 +101,7 @@ internal class PDYNotificationHandler {
                     val notificationBuilder = NotificationCompat.Builder(context, defaultChannel)
                     val smallIcon = Pushdy.getSmallIcon()
                     Log.d("PDYNotificationHandler", "notify().smallIcon: $smallIcon")
-                    notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info)
+                    notificationBuilder.setSmallIcon(smallIcon)
                     notificationBuilder.setContentTitle(title)
                     notificationBuilder.setContentText(body)
                     notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
