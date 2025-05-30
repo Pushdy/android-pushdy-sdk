@@ -349,7 +349,7 @@ open class Pushdy {
         }
 
         @JvmStatic
-        fun getSmallIcon() : Int? {
+        fun getSmallIcon() : Int {
             return _smallIcon ?: R.drawable.ic_notification
         }
 
