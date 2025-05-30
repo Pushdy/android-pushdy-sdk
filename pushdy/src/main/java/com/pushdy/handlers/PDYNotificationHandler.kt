@@ -67,7 +67,7 @@ internal class PDYNotificationHandler {
 
         fun notify(context:Context, title: String, body: String, image:String, data: Map<String, Any>, jsonData: String) {
             val curActivity = PDYLifeCycleHandler.curActivity
-            // Log.d("PDYNotificationHandler", "notify().curActivity != null : ${curActivity != null}")
+            Log.d("PDYNotificationHandler", "notify().curActivity != null : ${curActivity != null}")
 
 
             var intentClass: Class<*>?
@@ -100,6 +100,7 @@ internal class PDYNotificationHandler {
                     val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                     val notificationBuilder = NotificationCompat.Builder(context, defaultChannel)
                     val smallIcon = Pushdy.getSmallIcon()
+                    Log.d("PDYNotificationHandler", "notify().smallIcon: $smallIcon")
                     notificationBuilder.setSmallIcon(android.R.drawable.ic_dialog_info)
                     notificationBuilder.setContentTitle(title)
                     notificationBuilder.setContentText(body)
