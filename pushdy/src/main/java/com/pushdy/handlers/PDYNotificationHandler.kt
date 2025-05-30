@@ -107,9 +107,9 @@ internal class PDYNotificationHandler {
                     notificationBuilder.setAutoCancel(true)
                     notificationBuilder.setSound(soundUri)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        val channel = NotificationChannel("default_channel", "default_channel", NotificationManager.IMPORTANCE_DEFAULT);
+                        val channel = NotificationChannel(defaultChannel, defaultChannel, NotificationManager.IMPORTANCE_DEFAULT);
                         notificationManager.createNotificationChannel(channel);
-                        notificationBuilder.setChannelId("default_channel");
+                        notificationBuilder.setChannelId(defaultChannel);
                     }
                     val multiplier = getImageFactor(context.getResources())
                     val bitmap = getBitmapfromUrl(image)
