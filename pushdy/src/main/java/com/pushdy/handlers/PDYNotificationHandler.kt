@@ -94,7 +94,7 @@ internal class PDYNotificationHandler {
                     intent.putExtra("pushdy_notification", jsonData)
 
                     val defaultChannel =
-                        Pushdy.getNotificationChannel() ?: "default_notification_channel"
+                        Pushdy.getNotificationChannel()
                     val pendingIntent =
                         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
                     val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)

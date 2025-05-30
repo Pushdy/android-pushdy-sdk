@@ -66,7 +66,7 @@ open class Pushdy {
         private var _fetchingAttributes:Boolean = false
         private var _smallIcon:Int? = null
         private var _badge_on_foreground:Boolean = false
-        private var _notificationChannel:String? = null
+        private var _notificationChannel:String = "Pushdy"
         private var _last_notification_id:String? = null
         private var _pendingNotifications:MutableList<String> = mutableListOf()
         private var _customPushBannerView:View? = null
@@ -931,7 +931,7 @@ open class Pushdy {
             _notificationChannel = channel
         }
 
-        fun getNotificationChannel() : String? {
+        fun getNotificationChannel() : String {
             return _notificationChannel
         }
 
