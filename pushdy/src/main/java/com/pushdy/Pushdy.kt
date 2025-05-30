@@ -350,7 +350,7 @@ open class Pushdy {
 
         @JvmStatic
         fun getSmallIcon() : Int? {
-            return _smallIcon ?: R.drawable.ic_notification
+            return _smallIcon ?: R.mimap.ic_notification
         }
 
         private fun setPlayerID(playerID: String) {
