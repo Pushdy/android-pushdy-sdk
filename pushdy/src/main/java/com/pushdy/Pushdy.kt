@@ -136,8 +136,10 @@ open class Pushdy {
             _context = context
             _smallIcon = smallIcon
 
-            observeAttributesChanged()
-            restoreDataFromStorage()
+            if (delegate != null) {
+                observeAttributesChanged()
+                restoreDataFromStorage()
+            }
         }
 
         @JvmStatic
