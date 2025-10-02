@@ -125,8 +125,10 @@ open class Pushdy {
             _delegate = delegate
             _context = context
 
-            observeAttributesChanged()
-            restoreDataFromStorage()
+            if (delegate != null) {
+                observeAttributesChanged()
+                restoreDataFromStorage()
+            }
         }
 
         @JvmStatic
